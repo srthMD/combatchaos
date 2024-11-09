@@ -1,0 +1,36 @@
+{
+  "name": "combatchaos",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Data": {
+        "$path": "src/data"
+      },
+
+      "Packages": {
+        "$path": "Packages"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+    
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}

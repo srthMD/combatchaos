@@ -1,0 +1,2 @@
+--Remember that when Loader returns a table, it is a shallow copy, nested tables wont be cloned.
+--If this ever needs to be changed, make a deep copy method or change how retreiving models work.
