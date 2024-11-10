@@ -1,4 +1,6 @@
 --thanks to random devforum post bc this is nice util for OOP
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Component = require(ReplicatedStorage.Packages.Component)
 
 local Rcade = {}
 
@@ -29,7 +31,32 @@ function Rcade.class(newClass)
 		end
 	end
 
+	print(`making class {newClass}`)
+
 	newClass.__index = newClass
+
+	if newClass.Tag then
+		local componentSettings = {}
+
+		componentSettings["Tag"] = newClass.Tag
+
+		if newClass["Ancestors"] then
+			componentSettings["Ancestors"] = newClass.Ancestors
+		end
+
+		if newClass["Extensions"] then
+			componentSettings["Extensions"] = newClass.Extensions
+		end
+
+		local classComponent = Component.new(componentSettings)
+
+		if newClass.__super.Stop then
+			classComponent.Stop = newClass.__super.Stop
+		end
+
+		newClass.Component = classComponent
+	end
+
 	return setmetatable(newClass, Rcade)
 end
 

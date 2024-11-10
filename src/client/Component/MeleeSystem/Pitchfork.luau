@@ -2,48 +2,26 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Shared.Rcade)
-
-local SETTINGS = {
-	Tag = "PitchforkMelee",
-}
+local Component = require(rStore.Packages.Component)
 
 --> Class Definition
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
-local Pitchfork = Rcade.class({ __super = Super, Tag = SETTINGS.Tag })
+local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
+local Pitchfork = Component.new({
+	Tag = "Pitchfork",
+	Extensions = { OnlyLocalPlayer, Super },
+	Ancestors = { workspace, game.Players },
+})
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
---> Constructor
-function Pitchfork:__init(inst: Tool)
-	self.__super.__init(self, inst)
-	self["EquipDB"] = false
-	self["Phase"] = 0
-	self:__backendInit()
+--> Cosnstructor
+function Pitchfork:Cosnstruct()
+	self.Debounce = false
+	self.EquipDB = false
+	self.Phase = 0
 end
-
---> Backend Constructor
-function Pitchfork:__backendInit(): ()
-	if self.Instance == nil then
-		return
-	end
-
-	self.Instance.Activated:Connect(function()
-		self:OnActivate()
-	end)
-
-	self.Instance.Equipped:Connect(function()
-		self:OnEquip()
-	end)
-
-	self.Instance.Destroying:Connect(function()
-		self:Destroy()
-	end)
-end
-
---> Private Functions
--- not inheritable
 
 --> Module Functions
 function Pitchfork:OnActivate(): ()

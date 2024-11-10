@@ -5,13 +5,13 @@
 --> Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local ServerScriptService = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
 
 --> Variables
 local module = {}
 
 local SharedType = require(ReplicatedStorage.Data.SharedType)
-local SharedFuncs = require(ServerScriptService.Server.Shared.Projectile.ProjectileShared)
+local SharedFuncs = require(ServerStorage.Server.Shared.Projectile.ProjectileShared)
 
 local rev_ReplicateProjectile = ReplicatedStorage.Signals.Remote.ReplicateProjectile
 local rev_Hit = ReplicatedStorage.Signals.Remote.Hit

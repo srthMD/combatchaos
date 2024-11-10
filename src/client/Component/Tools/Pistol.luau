@@ -1,84 +1,55 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local SETTINGS = {
-	Tag = "Pistol",
-}
-
-local Component = { Tag = SETTINGS.Tag }
-Component.__index = Component
-
-local CreateProjectileEvent = rStore.Signals.Client.CreateProjectile
+local Component = require(rStore.Packages.Component)
+local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
+local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
+local Pistol =
+	Component.new({ Tag = "Pistol", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
 
 local equipSound = rStore.Assets.ItemDeps.Pistol.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Component.new(inst: Tool)
-	local self = setmetatable({
-		["_initalized"] = false,
-		["Instance"] = inst,
-		["debounce"] = false,
-		["animation"] = Instance.new("Animation"),
-		["animator"] = nil, -- Will be initialized later
-	}, Component)
-
-	self:_init()
-	return self
+function Pistol:Construct()
+	self.debounce = false
+	self.Animation = Instance.new("Animation")
+	self.Animator = nil
 end
 
-function Component:_init()
-	if self._initalized == true then
-		return
+function Pistol:OnEquip()
+	local clone = equipSound:Clone()
+	clone.Parent = self.Instance
+	clone:Play()
+
+	self.animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
+	if humanoid then
+		self.animator = humanoid:LoadAnimation(self.animation)
+	else
+		warn("Humanoid not found in character.")
 	end
-	self._initalized = true
-
-	math.randomseed(os.time())
-
-	self.Instance.Equipped:Connect(function(mouse)
-		local clone = equipSound:Clone()
-		clone.Parent = self.Instance
-		clone:Play()
-
-		-- Set the animation ID here
-		self.animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
-		local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
-		if humanoid then
-			self.animator = humanoid:LoadAnimation(self.animation)
-		else
-			warn("Humanoid not found in character.")
-		end
-	end)
-
-	self.Instance.Activated:Connect(function()
-		if not self.debounce then
-			self.debounce = true
-
-			local hPos = self.Instance.Handle.Position
-			local mHit = Mouse.Hit.Position
-			local dir = (mHit - hPos).Unit
-
-			-- Fire the pistol bullet
-			CreateProjectileEvent:Fire("Pistol", hPos, dir)
-
-			-- Play the animation
-			if self.animator then
-				self.animator:Play()
-			end
-
-			task.wait(0.25)
-			self.debounce = false
-		end
-	end)
-
-	self.Instance.Destroying:Connect(function()
-		self:Destroy()
-	end)
 end
 
-function Component:Destroy()
-	self.Instance = nil
+function Pistol:OnActivate()
+	if not self.debounce then
+		self.debounce = true
+
+		local hPos = self.Instance.Handle.Position
+		local mHit = Mouse.Hit.Position
+		local dir = (mHit - hPos).Unit
+
+		self.Event:Fire("Pistol", hPos, dir)
+
+		-- Play the animation
+		if self.animator then
+			self.animator:Play()
+		end
+
+		task.wait(0.25)
+		self.debounce = false
+	end
 end
 
-return Component
+return Pistol

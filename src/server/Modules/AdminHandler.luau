@@ -7,14 +7,13 @@ local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 local dsService = game:GetService("DataStoreService")
-local ssServ = game:GetService("ServerScriptService")
 
 --> Variables
 local module = {}
 local signals = {}
 local isStudio = game:GetService("RunService"):IsStudio()
 
-local funcModule = require(ssServ.Server.Shared.Admin.Functions)
+local funcModule = require(sStore.Server.Shared.Admin.Functions)
 local allowed = funcModule.allowed -- shared table
 
 local ui = sStore.Assets.Admin.Lah

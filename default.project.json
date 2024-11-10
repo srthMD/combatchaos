@@ -14,29 +14,37 @@
 
       "Shared": {
         "$path": "src/clientshared"
-      }
-    },
+      },
 
-    "ServerScriptService": {
-      "Server": {
-        "$path": "src/server"
+      "Client": {
+        "$path": "src/client"
       }
     },
 
     "ServerStorage": {
       "Shared": {
         "$path": "src/servershared"
+      },
+
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+
+    "ServerScriptService": {
+      "Loaders": {
+        "$path": "src/loaders/server"
       }
     },
 
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "Client": {
-          "$path": "src/client"
+        "Loaders": {
+          "$path": "src/loaders/client"
         }
       }
     },
-    
+
     "SoundService": {
       "$properties": {
         "RespectFilteringEnabled": true

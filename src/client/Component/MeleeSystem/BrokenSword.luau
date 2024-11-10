@@ -2,45 +2,26 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Shared.Rcade)
-
-local SETTINGS = {
-	Tag = "BrokenSword",
-}
+local Component = require(rStore.Packages.Component)
 
 --> Class Definition
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
-local BrokenSword = Rcade.class({ __super = Super, Tag = SETTINGS.Tag })
+local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
+local BrokenSword = Component.new({
+	Tag = "BrokenSword",
+	Extensions = { OnlyLocalPlayer, Super },
+	Ancestors = { workspace, game.Players },
+})
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 local LUNGE_IMPULSE = Vector3.new(0, 0.5, -1) * 1000
 
 --> Constructor
-function BrokenSword:__init(inst: Tool)
-	self.__super.__init(self, inst)
-	self["EquipDB"] = false
-	self["lastAttackTime"] = 0
-	self:__backendInit()
-end
-
---> Backend Constructor
-function BrokenSword:__backendInit(): ()
-	if self.Instance == nil then
-		return
-	end
-
-	self.Instance.Activated:Connect(function()
-		self:OnActivate()
-	end)
-
-	self.Instance.Equipped:Connect(function()
-		self:OnEquip()
-	end)
-
-	self.Instance.Destroying:Connect(function()
-		self:Destroy()
-	end)
+function BrokenSword:Construct()
+	self.EquipDB = false
+	self.Debounce = false
+	self.lastAttackTime = 0
 end
 
 --> Private Functions

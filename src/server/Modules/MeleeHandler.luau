@@ -2,9 +2,9 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local sStore = game:GetService("ServerStorage")
-local ssServ = game:GetService("ServerScriptService")
-local Debris = game:GetService("Debris")
 local runServ = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local ssServ = game:GetService("ServerScriptService")
 
 local isStudio = runServ:IsStudio()
 
@@ -23,7 +23,7 @@ local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 local ev_OnHit = sStore.Signals.Event.OnHitMelee
 local ev_OnAttack = sStore.Signals.Event.OnAttackMelee
 
-local actor = ssServ.Server.Actors.MeleeHandler
+local actor = sStore.Server.Actors.MeleeHandler
 
 local AF: Folder
 

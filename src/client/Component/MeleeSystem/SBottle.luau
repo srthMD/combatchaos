@@ -2,47 +2,22 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Shared.Rcade)
-
-local SETTINGS = {
-	Tag = "SBottle",
-}
+local Component = require(rStore.Packages.Component)
 
 --> Class Definition
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
-local SBottle = Rcade.class({ __super = Super, Tag = SETTINGS.Tag })
+local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
+local SBottle =
+	Component.new({ Tag = "SBottle", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
 --> Constructor
-function SBottle:__init(inst: Tool)
-	self.__super.__init(self, inst)
-	self["EquipDB"] = false
-	self:__backendInit()
+function SBottle:Construct()
+	self.EquipDB = false
+	self.Debounce = false
 end
-
---> Backend Constructor
-function SBottle:__backendInit(): ()
-	if self.Instance == nil then
-		return
-	end
-
-	self.Instance.Activated:Connect(function()
-		self:OnActivate()
-	end)
-
-	self.Instance.Equipped:Connect(function()
-		self:OnEquip()
-	end)
-
-	self.Instance.Destroying:Connect(function()
-		self:Destroy()
-	end)
-end
-
---> Private Functions
--- not inheritable
 
 --> Module Functions
 function SBottle:OnActivate(): ()

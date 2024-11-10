@@ -1,13 +1,13 @@
 --> Services
 local Players = game:GetService("Players")
-local ssServ = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
 
 --> Module Stuff
 local module = {}
 
 --> Variables
 
-local sharedMods = ssServ.Server.Shared
+local sharedMods = ServerStorage.Server.Shared
 
 local ACPlayer = require(sharedMods.AC.ACPlayer)
 local tags = require(sharedMods.AC.Tags)
@@ -39,7 +39,7 @@ function addPlayer(plr: Player)
 	table.insert(ACPlayers, new)
 end
 
-function Flag(plr: Player, category: string, tag: string)
+function _Flag(plr: Player, category: string, tag: string)
 	assert(tags[category], "Invalid category")
 
 	local _category = tags[category]

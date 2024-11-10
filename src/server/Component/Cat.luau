@@ -1,33 +1,21 @@
 --> Services
 local rStore = game:GetService("ReplicatedStorage")
 
-local SETTINGS = {
-	Tag = "Cat",
-}
+local Component = require(rStore.Packages.Component)
 
-local Component = { Tag = SETTINGS.Tag }
-Component.__index = Component
+local Cat = Component.new({ Tag = "Cat", Ancestors = { workspace } })
 
 --> Variables
 local bounce = rStore.Assets.ItemDeps.CatTube.bounce
 
 --> Constructor
-function Component.new(inst: BasePart)
-	local self = setmetatable({
-		["_initalized"] = false,
-		["_spawned"] = inst.Parent == workspace.Debris,
-		["Instance"] = inst,
-		["hitDebounce"] = false,
-	}, Component)
-
-	self:_init()
-	return self
+function Cat:Constuct()
+	self.hitDebounce = false
+	self.touchedConnection = nil
 end
 
---> Private functions
-
 --> Component Functions
-function Component:OnHit()
+function Cat:OnHit()
 	if not self.hitDebounce then
 		self.hitDebounce = true
 
@@ -47,27 +35,18 @@ function Component:OnHit()
 end
 
 --> Init Function
-function Component:_init()
-	if self._initalized == true then
-		return
-	end
-	if not self._spawned then
-		return
-	end
-	self._initalized = true
-
-	local tc = self.Instance.Touched:Connect(function()
+function Cat:Start()
+	self.touchedConnection = self.Instance.Touched:Connect(function()
 		self:OnHit()
 	end)
-
-	self.Instance.Destroying:Once(function()
-		tc:Disconnect()
-		self:Destroy()
-	end)
 end
 
-function Component:Destroy()
-	self.Instnace = nil
+function Cat:Stop()
+	if self.touchedConnection.Connected then
+		self.touchedConnection:Disconnect()
+	end
+
+	self.touchedConnection = nil
 end
 
-return Component
+return Cat

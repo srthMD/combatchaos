@@ -2,49 +2,28 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Shared.Rcade)
-
-local SETTINGS = {
-	Tag = "GenericAnimatableMelee",
-}
+local Component = require(rStore.Packages.Component)
 
 --> Class Definition
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
-local GenericAnimatable = Rcade.class({ __super = Super, Tag = SETTINGS.Tag })
+local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
+local GenericAnimatable = Component.new({
+	Tag = "GenericAnimatableMelee",
+	Extensions = { OnlyLocalPlayer, Super },
+	Ancestors = { workspace, game.Players },
+})
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
 --> Constructor
-function GenericAnimatable:__init(inst: Tool)
-	self.__super.__init(self, inst)
-	self:__backendInit()
+function GenericAnimatable:Construct()
+	self.Debounce = false
+	self.EquipDB = false
 end
-
---> Backend Constructor
-function GenericAnimatable:__backendInit(): ()
-	if self.Instance == nil then
-		return
-	end
-
-	self.Instance.Activated:Connect(function()
-		self:OnActivate()
-	end)
-
-	self.Instance.Equipped:Connect(function()
-		self:OnEquip()
-	end)
-
-	self.Instance.Destroying:Connect(function()
-		self:Destroy()
-	end)
-end
-
---> Private Functions
--- not inheritable
 
 --> Module Functions
-function GenericAnimatable:OnActivate(): ()
+function GenericAnimatable:OnActivate()
 	if self.Debounce then
 		return
 	end

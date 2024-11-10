@@ -1,13 +1,10 @@
 local TweenService = game:GetService("TweenService")
-
-local SETTINGS = {
-	Tag = "ScrollingPattern",
-}
-
-local Component = { Tag = SETTINGS.Tag }
-Component.__index = Component
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local lPlr = game.Players.LocalPlayer
+
+local Component = require(ReplicatedStorage.Packages.Component)
+local ScrollingPattern = Component.new({ Tag = "ScrollingPattern", Ancestors = { lPlr.PlayerGui } })
 
 local info = TweenInfo.new(60, Enum.EasingStyle.Linear)
 local goal = { Position = UDim2.fromScale(-1, -0.85) }
@@ -21,26 +18,7 @@ local function stepImage(image: ImageLabel)
 	image.Position = UDim2.fromScale(0, 0)
 end
 
-function Component.new(inst: Frame)
-	if not inst:IsDescendantOf(lPlr.PlayerGui) then
-		return nil
-	end
-
-	local self = setmetatable({
-		["_initalized"] = false,
-		["Instance"] = inst,
-	}, Component)
-
-	self:_init()
-	return self
-end
-
-function Component:_init()
-	if self._initalized == true then
-		return
-	end
-	self._initalized = true
-
+function ScrollingPattern:Construct()
 	self.thread = task.spawn(function()
 		while true do
 			stepImage(self.Instance :: ImageLabel)
@@ -48,10 +26,9 @@ function Component:_init()
 	end)
 end
 
-function Component:Destroy()
-	self.Instance = nil
+function ScrollingPattern:Stop()
 	task.cancel(self.thread)
 	self.thread = nil
 end
 
-return Component
+return ScrollingPattern
