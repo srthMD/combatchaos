@@ -15,35 +15,31 @@ local ev_RemoveRagdoll = sStore.Signals.Event.RemoveRagdoll
 local ev_DoRagdoll = sStore.Signals.Event.DoRagdoll
 
 function Ragdollable:Construct()
-	self.Humanoid = self.Instance:FindFirstChildWhichIsA("Humanoid")
-	self["Ragdolled"] = false
+	assert(self.Instance.ClassName == "Humanoid")
+
+	self.Ragdolled = false
+	self.Character = self.Instance.Parent
 end
 
 function Ragdollable:Start()
-	if self.Humanoid == nil then
-		self:Stop()
-		return
-	end
+	ev_AddRagdoll:Fire(self.Instance)
 
-	ev_AddRagdoll:Fire(self)
-
-	self.Humanoid.Died:Once(function()
-		ev_DoRagdoll:Fire(self.Character)
+	self.Instance.Died:Once(function()
+		ev_DoRagdoll:Fire(self.Instance)
 	end)
 
-	RagdollJoints:SetupJoints(self.Character, self.Humanoid)
+	RagdollJoints:SetupJoints(self.Character, self.Instance)
 	local a = Instance.new("Attachment")
 	a.Name = "LinearVelAttachment"
-	a.Parent = self.Character.HumanoidRootPart
-	a.Position = self.Character.HumanoidRootPart.Position
+	a.Parent = self.Instance.Parent.HumanoidRootPart
+	a.Position = self.Instance.Parent.HumanoidRootPart.Position
 
-	self.Humanoid.BreakJointsOnDeath = false
-	self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+	self.Instance.BreakJointsOnDeath = false
+	self.Instance:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
 end
 
 function Ragdollable:Stop()
-	self.Humanoid = nil
-	ev_RemoveRagdoll:Fire(self.Character)
+	ev_RemoveRagdoll:Fire(self.Instance)
 end
 
 return Ragdollable

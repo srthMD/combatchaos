@@ -4,6 +4,8 @@ local Players = game:GetService("Players")
 local sStore = game:GetService("ServerStorage")
 local rServ = game:GetService("RunService")
 
+local RagdollComponent = require(script.Parent.Parent.Component.Ragdollable)
+
 --> Module Stuff
 local module = {}
 
@@ -14,19 +16,24 @@ local ev_getRagdollable = sStore.Signals.Event.GetRagdoll
 local ev_DoRagdoll = sStore.Signals.Event.DoRagdoll
 local rev_Ragdoll = rStore.Signals.Remote.ReplicateRagdoll
 
-local models = {}
+local models = {} :: { [string]: unknown }
 
 local DOWN = Vector3.new(0, -3, 0)
 
 --> Private Functions
 function addModel(ragdollable)
-	models[ragdollable.Character.Name] = ragdollable
+	local ragdollComponent = RagdollComponent:FromInstance(ragdollable)
+
+	assert(ragdollComponent ~= nil)
+
+	models[ragdollComponent.Character.Name] = ragdollComponent
 end
 
 function removeModel(model: Model)
 	if model == nil then
 		return
 	end
+
 	models[model.Name] = nil
 
 	for i, v in pairs(model:GetDescendants()) do
@@ -36,7 +43,7 @@ function removeModel(model: Model)
 	end
 end
 
-function getRagdoll(model: Model): (Model?, number?)
+function getRagdoll(model: Instance): (unknown?, number?)
 	for i, v in pairs(models) do
 		if v.Character == model then
 			return v, i
@@ -46,40 +53,36 @@ function getRagdoll(model: Model): (Model?, number?)
 	return nil
 end
 
-function doRagdoll(model: Model, getUpTime: number?, force: Vector3?)
-	local v, _idx = getRagdoll(model)
+function doRagdoll(model: Humanoid, getUpTime: number?, force: Vector3?)
+	assert(model.Parent ~= nil)
 
-	if not v then
+	local component, _idx = getRagdoll(model.Parent)
+
+	if component == nil then
+		if rServ:IsStudio() then
+			warn(`Could not find ragdollable of character {model.Name}.`)
+		end
+
 		return
 	end
 
-	v.Ragdolled = true
-	for _, anim in pairs(v.Humanoid:GetPlayingAnimationTracks()) do
+	component.Ragdolled = true
+	for _, anim in pairs(component.Instance:GetPlayingAnimationTracks()) do
 		anim:Stop()
 	end
 
-	for _, inst in pairs(v.Character:GetDescendants()) do
-		if inst:IsA("Motor6D") and inst.Name ~= "RootJoint" and inst.Name ~= "Waist" and inst.Name ~= "Root" then
+	for _, inst in pairs(component.Character:GetDescendants()) do
+		if inst:IsA("Motor6D") and ((inst.Name ~= "RootJoint") or (inst.Name ~= "Waist") or (inst.Name ~= "Root")) then
 			inst.Enabled = false
 		end
 	end
 
 	local c = nil
 
-	local plr = Players:GetPlayerFromCharacter(v.Character)
+	component.Instance:UnequipTools()
+
+	local plr = Players:GetPlayerFromCharacter(component.Character)
 	if plr then
-		for _, inst in pairs(model:GetChildren()) do
-			if inst:IsA("Tool") then
-				inst.Parent = plr.Backpack
-			end
-
-			if inst:IsA("BasePart") then
-				if not inst.Anchored then
-					inst:SetNetworkOwner(plr)
-				end
-			end
-		end
-
 		c = plr.Character.ChildAdded:Connect(function(a)
 			if a:IsA("Tool") then
 				if not plr.Backpack:FindFirstChild(a.Name) then
@@ -88,23 +91,23 @@ function doRagdoll(model: Model, getUpTime: number?, force: Vector3?)
 			end
 		end)
 
-		rev_Ragdoll:FireClient(Players:GetPlayerFromCharacter(v.Character), Enum.HumanoidStateType.Physics, force)
+		rev_Ragdoll:FireClient(plr, Enum.HumanoidStateType.Physics, force)
 	else
 		if force then
-			task.delay(0.05, function()
-				v.Character.Torso:ApplyImpulse(force)
+			task.defer(function()
+				component.Character.Torso:ApplyImpulse(force)
 			end)
 		end
 	end
 
-	v.Humanoid.AutoRotate = false
-	v.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+	component.Instance.AutoRotate = false
+	component.Instance:ChangeState(Enum.HumanoidStateType.Physics)
 
 	if getUpTime then
-		local penalty = waitUntilGrounded(v.Character)
+		local penalty = waitUntilGrounded(component.Character)
 
 		task.delay(getUpTime + penalty, function()
-			getUp(v)
+			getUp(component)
 
 			if plr then
 				if c and c.Connected then
@@ -115,27 +118,31 @@ function doRagdoll(model: Model, getUpTime: number?, force: Vector3?)
 	end
 end
 
-function getUp(v)
-	if v.Humanoid.Health > 0 then
-		if v.Ragdolled then
-			for i, v in pairs(v.Character:GetDescendants()) do
+function getUp(component)
+	if component.Instance.Health > 0 then
+		if component.Ragdolled then
+			for i, v in pairs(component.Character:GetDescendants()) do
 				if v:IsA("Motor6D") and v.Name ~= "RootJoint" and v.Name ~= "Waist" and v.Name ~= "Root" then
 					v.Enabled = true
 				end
 			end
-			local plr = Players:GetPlayerFromCharacter(v.Character)
+			local plr = Players:GetPlayerFromCharacter(component.Character)
 
 			if plr then
-				rev_Ragdoll:FireClient(Players:GetPlayerFromCharacter(v.Character), Enum.HumanoidStateType.GettingUp)
+				rev_Ragdoll:FireClient(
+					Players:GetPlayerFromCharacter(component.Character),
+					Enum.HumanoidStateType.GettingUp
+				)
 			else
-				v.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+				component.Instance:ChangeState(Enum.HumanoidStateType.GettingUp)
 			end
 
-			v.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-			v.Humanoid.AutoRotate = true
+			component.Instance:ChangeState(Enum.HumanoidStateType.GettingUp)
+			component.Instance.AutoRotate = true
 		end
 	end
-	v.Ragdolled = false
+
+	component.Ragdolled = false
 end
 
 function waitUntilGrounded(model: Model): number

@@ -33,7 +33,7 @@ local function Lunge(hrp: BasePart)
 end
 
 --> Module Functions
-function BrokenSword:OnActivate(): ()
+function BrokenSword:OnActivate()
 	if self.EquipDB == true then
 		return
 	end
