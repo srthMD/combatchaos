@@ -3,7 +3,8 @@ local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Libs.Rcade)
+local RagdollJoints = require(sStore.Shared.RagdollJoints)
+local Rcade = require(rStore.Shared.Rcade)
 
 local SETTINGS = {
 	Tag = "Ragdollable",
@@ -16,8 +17,6 @@ local Ragdollable = Rcade.class({ Tag = SETTINGS.Tag })
 local ev_AddRagdoll = sStore.Signals.Event.AddRagdoll
 local ev_RemoveRagdoll = sStore.Signals.Event.RemoveRagdoll
 local ev_DoRagdoll = sStore.Signals.Event.DoRagdoll
-
-local RagdollJoints = require(sStore.Libs.RagdollJoints)
 
 --> Constructor
 function Ragdollable:__init(inst: Humanoid)

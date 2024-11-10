@@ -2,7 +2,7 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Libs.Rcade)
+local Rcade = require(rStore.Shared.Rcade)
 
 local SETTINGS = {
 	Tag = "BrokenSword",

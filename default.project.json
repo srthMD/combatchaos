@@ -10,12 +10,22 @@
 
       "Packages": {
         "$path": "Packages"
+      },
+
+      "Shared": {
+        "$path": "src/clientshared"
       }
     },
 
     "ServerScriptService": {
       "Server": {
         "$path": "src/server"
+      }
+    },
+
+    "ServerStorage": {
+      "Shared": {
+        "$path": "src/servershared"
       }
     },
 

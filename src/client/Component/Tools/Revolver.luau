@@ -8,8 +8,6 @@ local SETTINGS = {
 local Component = { Tag = SETTINGS.Tag }
 Component.__index = Component
 
-local Shaker = require(rStore.Libs.CameraShaker)
-
 local CreateProjectileEvent = rStore.Signals.Client.CreateProjectile
 
 local equipSound = rStore.Assets.ItemDeps.Revolver.EquipSound
@@ -22,14 +20,6 @@ function Component.new(inst: Tool)
 		["_initalized"] = false,
 		["Instance"] = inst,
 		["debounce"] = false,
-		["shaker"] = Shaker.new(Enum.RenderPriority.Last.Value, function(shakeCf: CFrame)
-			local newCF = CFrame.new(Vector3.new(shakeCf.X, -math.abs(shakeCf.Y), shakeCf.Z), shakeCf.LookVector * 5)
-			workspace.CurrentCamera.CFrame *= newCF
-		end),
-		["rotShaker"] = Shaker.new(Enum.RenderPriority.Last.Value, function(shakeCf: CFrame)
-			local newCF = CFrame.new(Vector3.new(shakeCf.X, shakeCf.Y, shakeCf.Z), shakeCf.LookVector * 25)
-			workspace.CurrentCamera.CFrame *= newCF
-		end),
 		["animation"] = Instance.new("Animation"),
 		["animator"] = nil, -- Will be initialized later
 	}, Component)
@@ -45,9 +35,6 @@ function Component:_init()
 	self._initalized = true
 
 	math.randomseed(os.time())
-
-	self.shaker:Start()
-	self.rotShaker:Start()
 
 	self.Instance.Equipped:Connect(function(mouse)
 		local clone = equipSound:Clone()
@@ -67,16 +54,6 @@ function Component:_init()
 	self.Instance.Activated:Connect(function()
 		if not self.debounce then
 			self.debounce = true
-
-			self.rotShaker:ShakeOnce(12.5, 90, 0.05, 0.1, Vector3.zero, Vector3.new(1, 0.8, 1))
-			self.shaker:ShakeOnce(
-				6,
-				60,
-				0,
-				0.075,
-				Vector3.new(math.random(0.3, 0.5), 0.8, math.random(0.3, 0.5)),
-				Vector3.new(1, 0, 1)
-			)
 
 			local hPos = self.Instance.Handle.Position
 			local mHit = Mouse.Hit.Position

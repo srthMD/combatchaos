@@ -2,7 +2,7 @@
 local rStore = game:GetService("ReplicatedStorage")
 
 --> Deps
-local Rcade = require(rStore.Libs.Rcade)
+local Rcade = require(rStore.Shared.Rcade)
 local tagData = require(script.Parent.Tags)
 
 --> Class Definition

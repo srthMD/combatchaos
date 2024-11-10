@@ -5,3 +5,5 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
+Shake = "sleitnick/shake@1.1.0"
+FastCast = "encodedvenom/fastcastredux@0.1.3"

@@ -6,7 +6,7 @@ local Players = game:GetService("Players")
 local module = {}
 
 local SharedType = require(ReplicatedStorage.Data.SharedType)
-local FastCast = require(ReplicatedStorage.Libs.FastCast)
+local FastCast = require(ReplicatedStorage.Packages.FastCast)
 local Projectiles = require(ReplicatedStorage.Data.Projectiles.Loader)
 
 local Caster = FastCast.new()

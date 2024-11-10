@@ -6,12 +6,12 @@ local Players = game:GetService("Players")
 --> Variables
 local module = {}
 
+local BiasedRandom = require(sStore.Shared.BiasedRandom)
+
 local itemsFolder = sStore.Assets.Items
 local mapDataFolder = rStore.Data.Maps
 
 local mapChangedEvent = sStore.Signals.Event.MapChanged
-
-local BiasedRandom = require(sStore.Libs.BiasedRandom)
 
 local playing = game.ServerStorage.Playing
 

@@ -3,7 +3,7 @@ local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 --> Component Framework Dependencies
-local Rcade = require(rStore.Libs.Rcade)
+local Rcade = require(rStore.Shared.Rcade)
 
 --abstract
 local SETTINGS = {
