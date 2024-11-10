@@ -50,7 +50,7 @@ function Revolver:OnActivate()
 			self.animator:Play()
 		end
 
-		task.wait(0.25)
+		task.wait(0.8)
 		self.debounce = false
 	end
 end

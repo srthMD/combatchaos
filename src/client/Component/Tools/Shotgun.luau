@@ -61,7 +61,7 @@ function Shotgun:OnActivate()
 			self.animator:Play()
 		end
 
-		task.wait(0.25)
+		task.wait(3.325)
 		self.debounce = false
 	end
 end

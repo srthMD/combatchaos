@@ -50,7 +50,7 @@ function Sniper:OnActivate()
 			self.animator:Play()
 		end
 
-		task.wait(0.25)
+		task.wait(4.25)
 		self.debounce = false
 	end
 end
