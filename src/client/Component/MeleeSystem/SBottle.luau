@@ -39,7 +39,7 @@ function SBottle:OnActivate(): ()
 	end)
 end
 
-function SBottle:OnEquip(): ()
+function SBottle:OnEquip()
 	if not self.EquipDB then
 		self.EquipDB = true
 

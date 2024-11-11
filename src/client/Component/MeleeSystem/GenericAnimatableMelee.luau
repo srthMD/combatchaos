@@ -34,15 +34,7 @@ function GenericAnimatable:OnActivate()
 
 	self.Event:Fire(self.Data.BackendName, hCFrame)
 
-	local cooldown
-
-	if self.Instance:FindFirstChild("Cooldown") then
-		cooldown = self.Instance.Cooldown.Value
-	else
-		cooldown = self.Data.Cooldown
-	end
-
-	task.delay(cooldown, function()
+	task.delay(self.Data.Cooldown, function()
 		self.Debounce = false
 	end)
 end

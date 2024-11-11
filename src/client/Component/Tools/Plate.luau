@@ -28,7 +28,7 @@ function Plate:OnActivated()
 		CreateProjectileEvent:Fire("Plate", hPos, dir)
 		tool.Transparency = 1
 
-		task.wait(self.Instance.Cooldown.Value)
+		task.wait(2.5)
 		self.debounce = false
 		tool.Transparency = 0
 	end

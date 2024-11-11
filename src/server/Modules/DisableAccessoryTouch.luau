@@ -12,7 +12,11 @@ local module = {}
 function onCharacterAdd(char: Model, plr: Player)
 	plr.CharacterAppearanceLoaded:Wait()
 
-	local hum = char:WaitForChild("Humanoid")
+	local hum = char:FindFirstChild("Humanoid")
+
+	if not hum then
+		return
+	end
 
 	local animator = Instance.new("Animator")
 	animator.Parent = hum
