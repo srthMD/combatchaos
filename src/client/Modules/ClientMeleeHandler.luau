@@ -222,13 +222,6 @@ function module.Start()
 	ev_OnActivate.Event:Connect(onActivate)
 	urev_VisualizeHitbox.OnClientEvent:Connect(visualizeHitbox)
 	urev_HitIndicator.OnClientEvent:Connect(handleHitIndicator)
-	rev_ReplicateRagdoll.OnClientEvent:Connect(function(state, force: Vector3?)
-		local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
-		hum:ChangeState(state)
-		if force then
-			hum.Parent.Torso:ApplyImpulse(force)
-		end
-	end)
 end
 
 return module

@@ -29,10 +29,10 @@ function Shotgun:OnEquip()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	self.Animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
-		self.animator = humanoid:LoadAnimation(self.animation)
+		self.Animator = humanoid:LoadAnimation(self.Animation)
 	else
 		warn("Humanoid not found in character.")
 	end
@@ -57,8 +57,8 @@ function Shotgun:OnActivate()
 		end
 
 		-- Play the animation
-		if self.animator then
-			self.animator:Play()
+		if self.Animator then
+			self.Animator:Play()
 		end
 
 		task.wait(3.325)
