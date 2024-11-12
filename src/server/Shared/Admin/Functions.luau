@@ -63,29 +63,6 @@ function module.events.player.Explode(plr: Player)
 	ex:Destroy()
 end
 
-function module.events.player.RemoveCooldown(plr: Player)
-	local char = plr.Character
-
-	if not char then
-		return
-	end
-
-	for _, v in pairs(char:GetChildren()) do
-		if v:IsA("Tool") then
-			if v:FindFirstChild("Cooldown") then
-				v.Cooldown.Value /= 300
-			end
-		end
-	end
-	for _, v in pairs(plr.Backpack:GetChildren()) do
-		if v:IsA("Tool") then
-			if v:FindFirstChild("Cooldown") then
-				v.Cooldown.Value /= 300
-			end
-		end
-	end
-end
-
 function module.events.player.GrantAdmin(plr: Player)
 	local suc = pcall(function()
 		return admDs:SetAsync(plr.UserId, true)
