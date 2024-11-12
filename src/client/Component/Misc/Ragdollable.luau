@@ -4,6 +4,8 @@ local Players = game:GetService("Players")
 local rServ = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 
+local rev_ReplicateGetUp = rStore.Signals.Remote.ReplicateGetUp
+
 --> self Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
@@ -25,11 +27,8 @@ local Ragdollable = Component.new({
 	},
 })
 
-local plr = Players.LocalPlayer
-
 local DOWN = Vector3.new(0, -3, 0)
 
---> Variables
 local rev_Ragdoll = rStore.Signals.Remote.ReplicateRagdoll
 
 local function waitUntilGrounded(model: Model): number
@@ -113,6 +112,7 @@ function Ragdollable:GetUp()
 
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
 	self.Ragdolled = false
+	rev_ReplicateGetUp:FireServer(self.Character)
 end
 
 function Ragdollable:StartRagdoll(recoveryTime: number?, force: Vector3?)
@@ -151,7 +151,11 @@ end
 
 function Ragdollable:Stop()
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
-	self.Connection:Disconnect()
+
+	if self.Connection and self.Connection.Connected then
+		self.Connection:Disconnect()
+	end
+
 	self.Ragdolled = false
 	self.Character = nil
 end
