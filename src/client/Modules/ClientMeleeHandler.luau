@@ -1,13 +1,10 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
 local tServ = game:GetService("TweenService")
 
---> Module Stuff
 local module = {}
 
---> Variables
 local SharedTypes = require(rStore.Data.SharedType)
 local MeleeData = require(rStore.Data.Melee.Loader)
 
@@ -40,7 +37,6 @@ local ColorHitRange = ColorSequence.new({
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 255)),
 })
 
---> Private Functions
 function onActivate(melee: string, origin: CFrame, animation: string?, sound: string?): ()
 	local char = LocalPlayer.Character
 	if not char then
@@ -273,9 +269,6 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 	end
 end
 
---> Module Functions
-
---> Loader Functions
 function module.Start()
 	ev_OnActivate.Event:Connect(onActivate)
 	urev_VisualizeHitbox.OnClientEvent:Connect(visualizeHitbox)

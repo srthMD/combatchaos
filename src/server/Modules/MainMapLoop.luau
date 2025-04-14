@@ -20,7 +20,7 @@ local votingEvents = rStore.Signals.Remote.Voting
 local mapChangedEvent = sStore.Signals.Event.MapChanged
 local sendTime = rStore.Signals.Remote.Unreliable.SendTime
 local votingEffectEvent = rStore.Signals.Remote.Unreliable.VotingEffect
-local sendMapEvent = rStore.Signams.Remote.SendMapName
+local sendMapEvent = rStore.Signals.Remote.SendMapName
 
 local playing = sStore.Playing
 
