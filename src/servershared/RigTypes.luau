@@ -27,7 +27,7 @@ local ELBOW_LIMITS = {
 local KNEE_LIMITS = {
 	UpperAngle = 30,
 	TwistLowerAngle = -120,
-	TwistUpperAngle = 0,
+	TwistUpperAngle = 45,
 }
 
 local SHOULDER_LIMITS = {
@@ -43,7 +43,7 @@ local HIP_LIMITS = {
 }
 
 local R6_HEAD_LIMITS = {
-	UpperAngle = 30,
+	UpperAngle = 45,
 	TwistLowerAngle = -60,
 	TwistUpperAngle = 60,
 }
@@ -56,7 +56,7 @@ local R6_SHOULDER_LIMITS = {
 
 local R6_HIP_LIMITS = {
 	UpperAngle = 60,
-	TwistLowerAngle = -5,
+	TwistLowerAngle = -75,
 	TwistUpperAngle = 120,
 }
 -- n0opimdumb3 says hi

@@ -1,6 +1,7 @@
 --> Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
 
 --> Variables
 local module = {}
@@ -21,9 +22,6 @@ local CastParams = RaycastParams.new()
 CastParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --> Private Functions
-
---idk
-function CastDestroy(cast) end
 
 function HitSomething(cast, result: RaycastResult, velocity: Vector3, inst: Instance)
 	local t = os.time()
@@ -50,8 +48,41 @@ end
 --	return v.Unit * math.min(v.Magnitude, max)
 --end
 
-function StepProjectile(cast, lastPoint: Vector3, rayDir: Vector3, displacement: number, velocity: Vector3, inst: any)
-	--inst can be of type model or basepart and it would just be a nightmare for typychecking so its any
+function cleanUpInst(inst: Instance)
+	for _, v in pairs(inst:GetDescendants()) do
+		if v:IsA("ParticleEmitter") then
+			v.Enabled = false
+		end
+
+		if v:IsA("PVAdornment") or v:IsA("Highlight") or v:IsA("Light") or v:IsA("BillboardGui") then
+			v:Destroy()
+		end
+
+		if v:IsA("BasePart") then
+			v.Transparency = 1
+		end
+
+		if v:IsA("SpecialMesh") then
+			v:Destroy()
+		end
+
+		Debris:AddItem(inst, 2)
+	end
+end
+
+function StepProjectile(
+	cast,
+	lastPoint: Vector3,
+	rayDir: Vector3,
+	displacement: number,
+	velocity: Vector3,
+	inst: BasePart
+)
+	if cast.StateInfo.TotalRuntime > cast.UserData.Lifetime then
+		cast:Terminate()
+		cleanUpInst(inst)
+	end
+
 	inst.Position = lastPoint + (rayDir * displacement)
 end
 
@@ -69,7 +100,7 @@ function AddProjectile(id: string, start: Vector3, direction: Vector3, doSound: 
 		behaviour.Acceleration = data.Acceleration
 		behaviour.CosmeticBulletContainer = workspace.Debris
 		local Cast = Caster:Fire(start, direction.Unit, direction.Magnitude, behaviour)
-		Cast.UserData = { Packet = { Owner = false } }
+		Cast.UserData = { Packet = { Owner = false }, Lifetime = data.Lifetime }
 
 		return
 	end
@@ -96,7 +127,7 @@ function AddProjectile(id: string, start: Vector3, direction: Vector3, doSound: 
 	behaviour.Acceleration = data.Acceleration
 	behaviour.CosmeticBulletContainer = workspace.Debris
 	local Cast = Caster:Fire(start, direction.Unit, new.Velocity, behaviour)
-	Cast.UserData = { Packet = new }
+	Cast.UserData = { Packet = new, Lifetime = data.Lifetime }
 
 	if doSound == nil then
 		doSound = true

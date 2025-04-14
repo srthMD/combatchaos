@@ -1,6 +1,9 @@
+--this is me like 1 year later i have no idea why i put this into an actor
+
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
 local isStudio = RunService:IsStudio()
 
@@ -13,6 +16,7 @@ local ev_DoRagdoll = serverEventFolder.DoRagdoll
 local ev_OnHit = serverEventFolder.OnHitMelee
 local ev_OnAttack = serverEventFolder.OnAttackMelee
 local ev_KillEvent = serverEventFolder.AddKill
+local ev_DropWeapon = serverEventFolder.DropWeapon
 
 local SharedTypes = require(rStore.Data.SharedType)
 
@@ -125,7 +129,7 @@ function doCasts(packet: SharedTypes.MeleePacket, data: SharedTypes.MeleeInfo)
 		if data.CastType.Type.Value == 0 then
 			result = workspace:GetPartBoundsInBox(cf, adjustedSize, CastParams)
 		else
-			result = workspace:GetPartBoundsInRadius(cf.Position, size, CastParams)
+			result = workspace:GetPartBoundsInRadius(cf.Position, size.Magnitude, CastParams)
 		end
 
 		for _, v in pairs(result) do
@@ -162,8 +166,11 @@ function doCasts(packet: SharedTypes.MeleePacket, data: SharedTypes.MeleeInfo)
 				task.synchronize()
 
 				ev_OnHit:Fire(data.BackendName, pHum, tool)
-				pHum:AddTag(packet.Time)
-
+				
+				if not data.DoNotTag then
+					pHum:AddTag(packet.Time)
+				end
+				
 				local dmg: number
 				local damageType = typeof(data.Damage)
 
@@ -175,12 +182,22 @@ function doCasts(packet: SharedTypes.MeleePacket, data: SharedTypes.MeleeInfo)
 					warn(
 						`Weapon data {data.MeleeName} has invalid damage data, number or function expected, got {damageType}.`
 					)
+					return
 				end
 
+				if isStudio then
+					print(`Hit {pHum.Parent.Name} with {data.MeleeName} for {dmg} dmg`)
+				end
 				pHum:TakeDamage(dmg)
 
 				if pHum.Health <= 0 then
 					ev_KillEvent:Fire(packet.Owner)
+					
+					local plr = Players:GetPlayerFromCharacter(pHum.Parent)
+					
+					if plr and math.random(1, 4) == 3 then
+						ev_DropWeapon:Fire(plr)
+					end
 				end
 
 				urev_HitIndicator:FireClient(packet.Owner, dmg, o_pos, hitIndPos, pHum.Parent)

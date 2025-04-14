@@ -6,6 +6,10 @@ local function _initTable(tbl: { Tool | ObjectValue }): { string }
 	local newTable = {} :: { string }
 
 	for _, v in pairs(tbl) do
+		if not typeof(v) == "Instance" then
+			continue
+		end
+		
 		local weight: number
 
 		if v:IsA("Tool") then
@@ -22,8 +26,16 @@ local function _initTable(tbl: { Tool | ObjectValue }): { string }
 					weight = folder.BiasedRandomWeight.Value
 				end
 			end
+			
+			local val = v.Value
+			
+			if val == nil then
+				warn(`Tool {v.Name} has nil value.`)
+				continue
+			else
+				v = v.Value
+			end
 
-			v = v.Value
 		else
 			error(
 				`Instance {v.Name} in folder {v.Name.Parent} must be an objectvalue or tool, illegal type {typeof(v)}.`
@@ -33,6 +45,10 @@ local function _initTable(tbl: { Tool | ObjectValue }): { string }
 		if weight == nil then
 			weight = 10
 			warn(`Tool {v.Name} does not have a weight, defaulting to 10.`)
+		end
+		
+		if weight == 0 then
+			continue
 		end
 
 		for count = 0, weight, 1 do
@@ -48,7 +64,6 @@ local function randomTools(tbl: {}, folder: Folder): { [string]: Tool }
 
 	for name, f in pairs(tbl :: { [string]: { string } }) do
 		if #f == 0 then
-			print(f)
 			continue
 		end
 
@@ -65,7 +80,13 @@ function BiasedRandom.tools(itemFolder: Folder)
 
 	for _, fold in pairs(itemFolder:GetChildren()) do
 		if fold:IsA("Folder") then
-			local t = _initTable(fold:GetChildren())
+			local ch = fold:GetChildren()
+			
+			if #ch == 0 then
+				error(`Tools folder is empty for map {itemFolder.Parent.Name}`)
+			end
+			
+			local t = _initTable(ch)
 			random:Shuffle(t)
 			randTbl[fold.Name] = t
 		end

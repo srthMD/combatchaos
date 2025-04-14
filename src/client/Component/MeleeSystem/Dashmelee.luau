@@ -8,7 +8,7 @@ local Component = require(rStore.Packages.Component)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
 local Pitchfork = Component.new({
-	Tag = "PitchforkMelee",
+	Tag = "Dashmelee",
 	Extensions = { OnlyLocalPlayer, Super },
 	Ancestors = { workspace, game.Players },
 })
@@ -39,17 +39,17 @@ function Pitchfork:OnActivate(): ()
 	local hCFrame = hrp.CFrame
 
 	if self.Phase == nil then
-		self.Phase = 0
+		self.Phase = 1
 	end
 	
 	self.Phase += 1
 
-	if self.Phase > 2 then
-		hrp:ApplyImpulse(hrp.CFrame:VectorToWorldSpace(-Vector3.zAxis * 3500))
+	if self.Phase > 1 then
+		hrp:ApplyImpulse(hrp.CFrame:VectorToWorldSpace(-Vector3.zAxis * 2000))
 
 		self.Event:Fire(self.Data.BackendName, hCFrame, "Dash", "Dash")
 
-		self.Phase = 0
+		self.Phase = 1
 	else
 		self.Event:Fire(self.Data.BackendName, hCFrame, "Jab", "Jab")
 	end

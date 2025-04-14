@@ -609,7 +609,9 @@ function ActiveCastStatic.new(caster: Caster, origin: Vector3, direction: Vector
 			end
 			
 		else
-			SimulateCast(cast, delta, false)
+			pcall(function()
+				SimulateCast(cast, delta, false)
+			end)
 		end
 	end)
 	
@@ -754,7 +756,9 @@ function ActiveCastStatic:Terminate()
 	self.StateInfo.UpdateConnection:Disconnect()
 	
 	-- Now fire CastTerminating
-	self.Caster.CastTerminating:Fire(self)
+	pcall(function()
+		self.Caster.CastTerminating:Fire(self)
+	end)
 	
 	-- And now set the update connection object to nil.
 	self.StateInfo.UpdateConnection = nil

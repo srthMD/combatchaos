@@ -1,6 +1,8 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
+
 local Component = require(rStore.Packages.Component)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
@@ -10,7 +12,7 @@ local Sniper = Component.new({
 	Ancestors = { workspace, game.Players },
 })
 
-local equipSound = rStore.Assets.ItemDeps.Pistol.EquipSound
+local equipSound = rStore.Assets.ItemDeps.Sniper.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
@@ -26,7 +28,7 @@ function Sniper:OnEquip()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.Animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	self.Animation.AnimationId = "rbxassetid://94943934894680" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
 		self.Animator = humanoid:LoadAnimation(self.Animation)
@@ -50,7 +52,8 @@ function Sniper:OnActivate()
 			self.Animator:Play()
 		end
 
-		task.wait(4.25)
+		cooldownEvent:Fire("Sniper", 4.3, Color3.fromRGB(25, 200, 25))
+		task.wait(4.3)
 		self.debounce = false
 	end
 end

@@ -4,29 +4,26 @@ local Players = game:GetService("Players")
 local Component = require(rStore.Packages.Component)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Revolver = Component.new({
-	Tag = "Revolver",
-	Extensions = { OnlyLocalPlayer, Super },
-	Ancestors = { workspace, game.Players },
-})
+local Romanianrifle =
+	Component.new({ Tag = "Romanianrifle", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
 
-local equipSound = rStore.Assets.ItemDeps.Revolver.EquipSound
+local equipSound = rStore.Assets.ItemDeps.Romanianrifle.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Revolver:Construct()
+function Romanianrifle:Construct()
 	self.debounce = false
 	self.Animation = Instance.new("Animation")
 	self.Animator = nil
 end
 
-function Revolver:OnEquip()
+function Romanianrifle:OnEquip()
 	local clone = equipSound:Clone()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.Animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	self.Animation.AnimationId = "rbxassetid://114182370586959" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
 		self.Animator = humanoid:LoadAnimation(self.Animation)
@@ -35,7 +32,7 @@ function Revolver:OnEquip()
 	end
 end
 
-function Revolver:OnActivate()
+function Romanianrifle:OnActivate()
 	if not self.debounce then
 		self.debounce = true
 
@@ -43,16 +40,16 @@ function Revolver:OnActivate()
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		self.Event:Fire("Revolver", hPos, dir)
+		self.Event:Fire("Romanianrifle", hPos, dir)
 
 		-- Play the animation
 		if self.Animator then
 			self.Animator:Play()
 		end
 
-		task.wait(0.8)
+		task.wait(.14)
 		self.debounce = false
 	end
 end
 
-return Revolver
+return Romanianrifle

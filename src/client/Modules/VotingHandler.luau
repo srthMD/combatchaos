@@ -2,12 +2,16 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local CollectionService = game:GetService("CollectionService")
 
 --> Variables
 local module = {}
 
 local info = TweenInfo.new(1.25, Enum.EasingStyle.Linear)
+local buttonCenterInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local playerIconInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local buttonInfo = TweenInfo.new(0.3, Enum.EasingStyle.Circular, Enum.EasingDirection.Out)
 
 local playerIconDefaultSize = UDim2.fromScale(0.15, 0.15)
 
@@ -24,14 +28,34 @@ local playerIconUI = votingRes.Player
 local voteClickSound = votingRes.Click
 
 local event = rStore.Signals.Remote.OnMapChange
+local votingEffectEvent = rStore.Signals.Remote.Unreliable.VotingEffect
 
 local mapData = rStore.Data.Maps
+local lobbyData = rStore.Data.Lobbies
 
 local defaultLightingData = require(rStore.Data.DefaultLighting)
 
 local SharedTypes = require(rStore.Data.SharedType)
 
+local tipTexts: {string} = require(rStore.Data.MenuTips)
+
 --> Private Functions
+
+local function offsetToScale(u: UDim2, ui: ScreenGui)
+	local screensize = ui.AbsoluteSize
+	return UDim2.new(
+		u.X.Offset/screensize.X, 0,
+		u.Y.Offset/screensize.Y, 0
+	)
+end
+
+local function vector2toUDim2Offset(v: Vector2)
+	return UDim2.new(
+		0,v.X,
+		0,v.Y
+	)
+end
+
 local function getPlayerThumbnails(): { [string]: any }
 	local thumbnails = {}
 
@@ -76,6 +100,11 @@ local function votingStarted(
 			inst:Destroy()
 		end
 	end
+	
+	local tipText = ui.VotingMain.Tip
+	local selectedText = tipTexts[math.random(1, #tipTexts)]
+	
+	tipText.Text = selectedText
 
 	local maps = {}
 	if dat then
@@ -143,29 +172,15 @@ local function votingStarted(
 		button.Parent = ui.VotingMain.Maps
 	end
 
-	task.spawn(function()
-		local text = ui.VotingMain.Time
-		local secondsPassed = 0
-
-		local curTime = os.time()
-		local diff = curTime - serverTime
-
-		seconds -= diff
-
-		while true do
-			if secondsPassed >= seconds then
-				break
-			end
-
-			text.Text = `{string.format("%i", seconds - secondsPassed)} seconds left`
-			secondsPassed += task.wait(1)
-		end
-	end)
-
 	return ui
 end
 
 local function votingEnded(ui: ScreenGui, chosenMap: string)
+	print("Voting Ended, chose "..chosenMap)
+	-- this runs after a map is chosen
+	-- it's me, devwing again
+	-- I added tweening for the chosen map so it gets put in the center and allat
+	
 	local mainFrame = ui:FindFirstChild("VotingMain")
 
 	if not mainFrame then
@@ -185,17 +200,62 @@ local function votingEnded(ui: ScreenGui, chosenMap: string)
 		c.Ended:Wait()
 		c:Destroy()
 	end)
-
+	
+	local mapDataFolder = mapData:FindFirstChild(chosenMap)
+	
 	local button = maps[chosenMap]
-
-	for _, b in pairs(maps:GetChildren()) do
-		if b:IsA("ImageLabel") and b.Name ~= button.Name then
-			TweenService:Create(b, info, { Transparency = 1 }):Play()
+	local bclone = button:Clone()
+	
+	bclone.Parent = ui
+	
+	bclone.Position = vector2toUDim2Offset(button.AbsolutePosition - votingUi.AbsolutePosition)
+	bclone.Size = vector2toUDim2Offset(button.AbsoluteSize)
+	
+	bclone.Position = offsetToScale(bclone.Position, ui)
+	bclone.Size = offsetToScale(bclone.Size, ui)
+	
+	bclone.AnchorPoint = button.AnchorPoint
+	
+	--bclone:FindFirstChildWhichIsA("UIAspectRatioConstraint").AspectType = Enum.AspectType.FitWithinMaxSize
+	
+	bclone.Visible = false
+	
+	for _, b in pairs(maps:GetChildren()) do -- tweens for the other map buttons
+		if b:IsA("ImageButton") then -- this code is very spaghetti 🍝
+			local uielements = {}
+			
+			for _,e in b:GetDescendants() do
+				if e:IsA("ImageLabel") then
+					TweenService:Create(e, info, { BackgroundTransparency = 1, ImageTransparency = 1 }):Play()
+				elseif e:IsA("UIStroke") or e:IsA("TextLabel") then
+					TweenService:Create(e, info, { Transparency = 1 }):Play()
+				end
+			end
+			
+			TweenService:Create(b, info, { BackgroundTransparency = 1, ImageTransparency = 1 }):Play()
 		end
 	end
+	
+	
+	bclone.Visible = true
+	
+	-- tweens for the winning map button
+	
+	TweenService:Create(bclone.UIStroke, info, { Color = Color3.new(0.0941176, 1, 0.0313725) }):Play()
+	TweenService:Create(bclone, buttonCenterInfo, {
+		Size = UDim2.new(0.209, 0, 0.444, 0),
+		Position = UDim2.new(0.395, 0, 0.397, 0)
+	}):Play()
+	
+	local creators = mapDataFolder:FindFirstChild("Creators")
 
-	TweenService:Create(button.UIStroke, info, { Color = Color3.new(0.0941176, 1, 0.0313725) }):Play()
-
+	if creators then
+		bclone.MadeBy.Text = "Made by: "..creators.Value
+		
+		TweenService:Create(bclone.MadeBy, info, { TextTransparency = 0 }):Play()
+		TweenService:Create(bclone.MadeBy.UIStroke, info, { Transparency = 0 }):Play()
+	end
+	
 	task.wait(5)
 
 	local blur = game.Lighting:FindFirstChild("VotingBlur")
@@ -228,8 +288,14 @@ local function setLighting(lightingData)
 	end
 end
 
-local function onMapChange(mapName: string)
-	local mapDataFolder = mapData:FindFirstChild(mapName)
+local function onMapChange(mapName: string, isLobby: boolean?)
+	local mapDataFolder: Folder
+	
+	if isLobby then
+		mapDataFolder = lobbyData:FindFirstChild(mapName)
+	else
+		mapDataFolder = mapData:FindFirstChild(mapName)
+	end
 
 	if not mapDataFolder then
 		setLighting(defaultLightingData)
@@ -240,7 +306,12 @@ local function onMapChange(mapName: string)
 		local postFx = mapDataFolder:FindFirstChild("PostEffects")
 		local skybox = mapDataFolder:FindFirstChildWhichIsA("Sky")
 		local clouds = mapDataFolder:FindFirstChildWhichIsA("Clouds")
-
+		
+		-- it's me, devwing
+		-- I added a "Creators" StringValue to every map under Data/Maps so we can give credit to the creator(s)
+		-- The values are separated by comma ',', and they're just the usernames
+		-- maybe we should add a way to get someone's username from the ID, though, because we can change username
+		
 		lPlr.PlayerGui:WaitForChild("MapFx"):ClearAllChildren()
 
 		for _, v in pairs(game.Lighting:GetChildren()) do
@@ -378,11 +449,69 @@ local function createPlayerIcon(plr: Player, map: string, pos: UDim2, ui: Screen
 
 	voteClickSound:Play()
 end
+
+local function votingEffect(mdl: Model)
+	local data = require(rStore.Data.Lobbies[workspace.MainMap:FindFirstChildWhichIsA("Model").Name].LobbyData)
+	
+	local button: BasePart = mdl.Button
+	local sound = button:FindFirstChild("TouchSound")
+	
+	if not sound then
+		--TODO: make this an acctual sound in assets
+		sound = rStore.Assets.DefaultTouchSound
+	end
+	
+	local c: Sound = sound:Clone()
+	c.Parent = button
+	c.RollOffMinDistance = 24
+	c.RollOffMaxDistance = 72
+	c:Play()
+	
+	task.spawn(function()
+		c.Ended:Wait()
+		c:Destroy()
+	end)
+	
+	local b_clone = button:Clone()
+	b_clone.Parent = workspace.Debris
+	b_clone.CanCollide = false
+	b_clone.CanTouch = false
+	b_clone.CanQuery = false
+	b_clone.CastShadow = false
+	b_clone.Color = button:GetAttribute("VoteColor") or Color3.fromHSV(0.308056, 0.827451, 1)
+	local t = TweenService:Create(b_clone, buttonInfo, {
+		Size = b_clone.Size * Vector3.new(1.2, 1, 1.2), 
+		Position = b_clone.Position + Vector3.new(0, 3, 0),
+		Transparency = 1,
+	})
+	
+	local b_tween = TweenService:Create(button, buttonInfo, {
+		Color = button:GetAttribute("VoteColor") or Color3.fromHSV(0.308056, 0.827451, 1)
+	})
+	
+	b_tween:Play()
+	t:Play()
+	Debris:AddItem(b_clone, buttonInfo.Time)
+	
+	local otherButtons = CollectionService:GetTagged("LobbyMapButton")
+	
+	for _, bt in pairs(otherButtons) do
+		if bt == mdl then
+			continue
+		end
+		
+		local button: BasePart = bt.Button
+		button.Color = data.DefaultColor
+	end
+end
+
 --> Module Functions
 
 --> Loader Methods
 function module.Start()
 	event.OnClientEvent:Connect(onMapChange)
+	
+	votingEffectEvent.OnClientEvent:Connect(votingEffect)
 
 	votingEvents.VoteStart.OnClientEvent:Connect(
 		function(maps: { string }?, voteDict: SharedTypes.VoteDict?, seconds: number, serverTime: number)

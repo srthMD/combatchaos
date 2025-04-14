@@ -1,7 +1,3 @@
--- @title: Server Projectile Handler
--- @author: qweekertom
--- @date: 2.29.2024
-
 --> Services
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")

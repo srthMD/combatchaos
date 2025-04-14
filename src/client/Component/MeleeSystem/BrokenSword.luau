@@ -15,7 +15,7 @@ local BrokenSword = Component.new({
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
-local LUNGE_IMPULSE = Vector3.new(0, 0.5, -1) * 1000
+local LUNGE_IMPULSE = Vector3.new(0, 0.6, -0.6) * 1000
 
 --> Constructor
 function BrokenSword:Construct()

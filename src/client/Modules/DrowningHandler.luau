@@ -3,37 +3,33 @@
 local rStore = game:GetService("ReplicatedStorage")
 local tServ = game:GetService("TweenService")
 
---A table that represents the properties of an Atmosphere object
-type AtmosphereProperties = { [string]: number | Color3 }
-
 --> Variables
 local module = {}
 
 local plr = game.Players.LocalPlayer
 
 --How long a player can stay underwater in seconds
-local MAX_AIR = 10
+local MAX_AIR = 8
 --How often the player should be damaged when drowning
 local TICK = 1
 --How much damage should be taken every tick
-local TICK_DMG = 13
+local TICK_DMG = 1/9 * 100
 
-local ATMO_DISABLED = {
-	Density = 0,
-	Offset = 0,
-	Color = Color3.new(1, 1, 1),
-	Decay = Color3.new(1, 1, 1),
-	Glare = 0,
-	Haze = 0,
-} :: AtmosphereProperties
+-- local ATMO_DISABLED = {
+-- 	Density = 0,
+-- 	Offset = 0,
+-- 	Color = Color3.new(1, 1, 1),
+-- 	Decay = Color3.new(1, 1, 1),
+-- 	Glare = 0,
+-- 	Haze = 0,
+-- }
 
---color will be determined by Terrain.WaterColor
-local ATMO_DEFAULT = {
-	Density = 0.85,
-	Offset = 0,
-	Glare = 0.7,
-	Haze = 10,
-} :: AtmosphereProperties
+-- local ATMO_DEFAULT = {
+-- 	Density = 0.85,
+-- 	Offset = 0,
+-- 	Glare = 0.7,
+-- 	Haze = 10,
+-- }
 
 local BLUR_SIZE = 9
 
@@ -42,21 +38,19 @@ local tickSound = rStore.Assets.Drowning.Hurt
 
 local underwater = false
 
-local underwaterAtmo: Atmosphere
+-- local underwaterAtmo: Atmosphere
 local underwaterBlur: BlurEffect
 
 local info = TweenInfo.new(0.6, Enum.EasingStyle.Circular)
 
-local tweens = {} :: { Tween }
+local tweens = {}
 
 --> Private Functions
 
---Returns true if the player is underwater and airtime is <= 0.
 local function isDrowning(airTime: number): boolean
 	return underwater and airTime <= 0
 end
 
---Updates the air bar according to the airTime/MAX_AIR.
 local function updateBar(airFrame: Frame, airTime: number)
 	local bar = airFrame:FindFirstChild("Bar")
 
@@ -75,11 +69,9 @@ local lastState = false
 
 local function toggleEffects(state: boolean)
 	if lastState ~= state then
-		for i, t in pairs(tweens) do
-			if t then
-				if t.PlaybackState == Enum.PlaybackState.Playing then
-					t:Cancel()
-				end
+		for _, t in pairs(tweens) do
+			if t and t.PlaybackState == Enum.PlaybackState.Playing then
+				t:Cancel()
 			end
 		end
 
@@ -87,35 +79,35 @@ local function toggleEffects(state: boolean)
 	end
 
 	if state == true then
-		local goalTable = {}
+		-- local goalTable = {}
 
-		for name, val in pairs(ATMO_DEFAULT) do
-			goalTable[name] = val
-		end
+		-- for name, val in pairs(ATMO_DEFAULT) do
+		-- 	goalTable[name] = val
+		-- end
 
-		local tint = workspace.Terrain.WaterColor
-		goalTable["Color"] = tint
-		local h, s, v = tint:ToHSV()
-		goalTable["Decay"] = Color3.fromHSV(h, s, math.max(v - 0.2, 0))
+		-- local tint = workspace.Terrain.WaterColor
+		-- goalTable["Color"] = tint
+		-- local h, s, v = tint:ToHSV()
+		-- goalTable["Decay"] = Color3.fromHSV(h, s, math.max(v - 0.2, 0))
 
-		local t = tServ:Create(underwaterAtmo, info, goalTable)
-		table.insert(tweens, t)
-		t:Play()
+		-- local t = tServ:Create(underwaterAtmo, info, goalTable)
+		-- table.insert(tweens, t)
+		-- t:Play()
 
 		underwaterBlur.Enabled = true
 		local t2 = tServ:Create(underwaterBlur, info, { Size = BLUR_SIZE })
 		table.insert(tweens, t2)
 		t2:Play()
 	else
-		local goalTable = {}
+		-- local goalTable = {}
 
-		for name, val in pairs(ATMO_DISABLED) do
-			goalTable[name] = val
-		end
+		-- for name, val in pairs(ATMO_DISABLED) do
+		-- 	goalTable[name] = val
+		-- end
 
-		local t = tServ:Create(underwaterAtmo, info, goalTable)
-		table.insert(tweens, t)
-		t:Play()
+		-- local t = tServ:Create(underwaterAtmo, info, goalTable)
+		-- table.insert(tweens, t)
+		-- t:Play()
 
 		local t2 = tServ:Create(underwaterBlur, info, { Size = 0 })
 		table.insert(tweens, t2)
@@ -230,13 +222,13 @@ function module.Start()
 	underwaterBlur.Name = "UnderwaterBlur"
 	underwaterBlur:AddTag("UnderwaterEffect")
 
-	underwaterAtmo = Instance.new("Atmosphere")
-	underwaterAtmo.Parent = game.Lighting
-	underwaterAtmo.Name = "UnderwaterAtmo"
-	underwaterAtmo:AddTag("UnderwaterEffect")
-	underwaterAtmo.Color = Color3.new(1, 1, 1)
-	underwaterAtmo.Decay = Color3.new(1, 1, 1)
-	underwaterAtmo.Density = 0
+	-- underwaterAtmo = Instance.new("Atmosphere")
+	-- underwaterAtmo.Parent = game.Lighting
+	-- underwaterAtmo.Name = "UnderwaterAtmo"
+	-- underwaterAtmo:AddTag("UnderwaterEffect")
+	-- underwaterAtmo.Color = Color3.new(1, 1, 1)
+	-- underwaterAtmo.Decay = Color3.new(1, 1, 1)
+	-- underwaterAtmo.Density = 0
 end
 
 return module

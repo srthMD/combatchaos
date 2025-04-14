@@ -2,26 +2,29 @@ local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local Component = require(rStore.Packages.Component)
+
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Revolver = Component.new({
-	Tag = "Revolver",
+local Flamethrower = Component.new({
+	Tag = "Flamethrower",
 	Extensions = { OnlyLocalPlayer, Super },
 	Ancestors = { workspace, game.Players },
 })
 
-local equipSound = rStore.Assets.ItemDeps.Revolver.EquipSound
+local equipSound = rStore.Assets.ItemDeps.Flamethrower.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Revolver:Construct()
+local rand = Random.new(os.time())
+
+function Flamethrower:Construct()
 	self.debounce = false
 	self.Animation = Instance.new("Animation")
 	self.Animator = nil
 end
 
-function Revolver:OnEquip()
+function Flamethrower:OnEquip()
 	local clone = equipSound:Clone()
 	clone.Parent = self.Instance
 	clone:Play()
@@ -35,7 +38,7 @@ function Revolver:OnEquip()
 	end
 end
 
-function Revolver:OnActivate()
+function Flamethrower:OnActivate()
 	if not self.debounce then
 		self.debounce = true
 
@@ -43,16 +46,24 @@ function Revolver:OnActivate()
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		self.Event:Fire("Revolver", hPos, dir)
+		for i = 0, 4, 1 do
+			local spread = dir + rand:NextUnitVector() * 0.06
+
+			if i == 0 then
+				self.Event:Fire("Flamethrower", hPos, spread, true)
+			else
+				self.Event:Fire("Flamethrower", hPos, spread)
+			end
+		end
 
 		-- Play the animation
 		if self.Animator then
 			self.Animator:Play()
 		end
 
-		task.wait(0.8)
+		task.wait(.15)
 		self.debounce = false
 	end
 end
 
-return Revolver
+return Flamethrower

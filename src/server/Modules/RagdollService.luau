@@ -16,10 +16,12 @@ local rev_ReplicateGetUp = rStore.Signals.Remote.ReplicateGetUp
 
 --> Private Functions
 local function addModel(char: Model)
-	local hum = char:FindFirstChild("Humanoid")
+	local hum = char:FindFirstChildWhichIsA("Humanoid")
 
 	if hum then
 		hum:AddTag("Ragdollable")
+		--hum.BreakJointsOnDeath = false
+		--hum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
 		RagdollJoints:SetupJoints(char, hum)
 	end
 end

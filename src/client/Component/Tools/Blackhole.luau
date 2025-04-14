@@ -1,32 +1,37 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
+
 local Component = require(rStore.Packages.Component)
+
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Revolver = Component.new({
-	Tag = "Revolver",
+local Blackhole = Component.new({
+	Tag = "Blackhole",
 	Extensions = { OnlyLocalPlayer, Super },
 	Ancestors = { workspace, game.Players },
 })
 
-local equipSound = rStore.Assets.ItemDeps.Revolver.EquipSound
+local equipSound = rStore.Assets.ItemDeps.Blackhole.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Revolver:Construct()
+local rand = Random.new(os.time())
+
+function Blackhole:Construct()
 	self.debounce = false
 	self.Animation = Instance.new("Animation")
 	self.Animator = nil
 end
 
-function Revolver:OnEquip()
+function Blackhole:OnEquip()
 	local clone = equipSound:Clone()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.Animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	self.Animation.AnimationId = "rbxassetid://128130366944938" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
 		self.Animator = humanoid:LoadAnimation(self.Animation)
@@ -35,7 +40,7 @@ function Revolver:OnEquip()
 	end
 end
 
-function Revolver:OnActivate()
+function Blackhole:OnActivate()
 	if not self.debounce then
 		self.debounce = true
 
@@ -43,16 +48,25 @@ function Revolver:OnActivate()
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		self.Event:Fire("Revolver", hPos, dir)
+		for i = 0, 2, 1 do
+			local spread = dir + rand:NextUnitVector() * 0.022
+
+			if i == 0 then
+				self.Event:Fire("Blackhole", hPos, spread, true)
+			else
+				self.Event:Fire("Blackhole", hPos, spread)
+			end
+		end
 
 		-- Play the animation
 		if self.Animator then
 			self.Animator:Play()
 		end
 
-		task.wait(0.8)
+		cooldownEvent:Fire("Blackhole Gun", 4.5, Color3.fromRGB(25, 200, 25))
+		task.wait(4.5)
 		self.debounce = false
 	end
 end
 
-return Revolver
+return Blackhole

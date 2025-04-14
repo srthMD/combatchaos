@@ -13,10 +13,13 @@ local MeleeData = require(rStore.Data.Melee.Loader)
 
 local assets = rStore.Assets.MeleeSys
 
-local indicatorInfo = TweenInfo.new(0.175, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+local indicatorInfo = TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local indicatorPart = rStore.Assets.MeleeSys.HitInd
 local iColor = indicatorPart.BillboardGui.TLabel.TextColor3
 local sound = rStore.Assets.MeleeSys.Hit
+
+local positivePrimary = Color3.fromRGB(21, 171, 19)
+local positiveSecondary = Color3.fromRGB(19, 38, 24)
 
 local eventFolder = rStore.Signals
 
@@ -25,6 +28,7 @@ local ev_OnActivate = eventFolder.Client.HandleMelee
 local urev_VisualizeHitbox = eventFolder.Remote.Unreliable.VisualizeHitbox
 local urev_HitIndicator = eventFolder.Remote.Unreliable.HitIndicator
 local rev_ReplicateRagdoll = eventFolder.Remote.ReplicateRagdoll
+local ev_CreateCooldownUi = eventFolder.Client.CreateCooldownUI
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -47,6 +51,16 @@ function onActivate(melee: string, origin: CFrame, animation: string?, sound: st
 	local pHum = char:FindFirstChildWhichIsA("Humanoid")
 	if not pHum or pHum.Health == 0 then
 		return
+	end
+	
+	local data = MeleeData(melee)
+	
+	if not data then
+		return
+	end
+	
+	if data.Cooldown > 3 then
+		ev_CreateCooldownUi:Fire(data.MeleeName, data.Cooldown, Color3.fromRGB(255, 107, 107))
 	end
 
 	task.spawn(playAttackAnimation, pHum, melee, animation)
@@ -117,7 +131,7 @@ function playAttackAnimation(pHum: Humanoid, melee: string, animation: string?)
 	end
 end
 
-function visualizeHitbox(cframe: CFrame, size: Vector3 | number, isSphere: boolean, validHits: number)
+function visualizeHitbox(cframe: CFrame, size: Vector3, isSphere: boolean, validHits: number?)
 	local part = Instance.new("Part")
 	part.Anchored = true
 	part.Transparency = 0.7
@@ -128,32 +142,71 @@ function visualizeHitbox(cframe: CFrame, size: Vector3 | number, isSphere: boole
 	part.CastShadow = false
 	part.CFrame = cframe
 
-	if isSphere and typeof(size) == "number" then
+	if isSphere then
 		part.Shape = Enum.PartType.Ball
-		part.Size = Vector3.new(size, size, size)
+		part.Size = size
 	else
 		part.Size = size
 	end
 
-	part.Color = ColorHitRange.Keypoints[math.clamp(validHits + 1, 1, #ColorHitRange.Keypoints)].Value
+	if validHits == nil then
+		part.Color = Color3.fromRGB(143, 145, 130)
+	else
+		part.Color = ColorHitRange.Keypoints[math.clamp(validHits + 1, 1, #ColorHitRange.Keypoints)].Value
+	end
 
 	part.Parent = workspace
 	Debris:AddItem(part, 2)
 end
 
 function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Model)
-	local indicator = plr:FindFirstChild("HitInd")
+	if dmg < 0 then
+		indicator = indicatorPart:Clone()
+		indicator.Handler.Enabled = true
+		indicator.Parent = plr
+		indicator.Position = pos
 
+		local c = sound:Clone()
+		c.Parent = game.SoundService
+		c:Play()
+
+		task.spawn(function()
+			c.Ended:Wait()
+			c:Destroy()
+		end)
+
+		local ui = indicator:FindFirstChildWhichIsA("BillboardGui")
+		local text: TextLabel = ui.TLabel
+		local str = string.format("%.1f", -dmg)
+		text.Text = "+" .. str
+		text.TextColor3 = Color3.fromRGB(177, 255, 148)
+		text.UIStroke.Color = positiveSecondary
+
+		t = tServ:Create(text, indicatorInfo, { TextColor3 = positivePrimary })
+		t2 = tServ:Create(indicator, indicatorInfo, { Position = newPos })
+
+		t:Play()
+		t2:Play()
+		
+		return
+	end
+	
+	local indicator = plr:FindFirstChild("HitInd")
+	
 	if indicator then
 		if t then
 			t:Destroy()
 			t2:Destroy()
 		end
+		
+		local iDmg: number = indicator:GetAttribute("Damage")
+		iDmg += dmg
+		
 		local ui = indicator:FindFirstChildWhichIsA("BillboardGui")
 		local pitchVal = indicator:FindFirstChild("Pitch")
 		indicator:FindFirstChild("Transparency").Value = 0
 
-		pitchVal.Value = math.clamp(math.pow(pitchVal.Value + 0.02, 1.3), 1.0, 2.0)
+		pitchVal.Value = math.clamp((pitchVal.Value + 0.1), 1, 2)
 
 		local c = sound:Clone()
 		c.Parent = game.SoundService
@@ -168,7 +221,8 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 		indicator.Position = pos
 
 		local text: TextLabel = ui.TLabel
-		local str = string.format("%.1f", dmg)
+		
+		local str = string.format("%.1f", iDmg)
 		text.Text = "-" .. str
 		text.TextColor3 = Color3.fromRGB(255, 172, 172)
 
@@ -177,9 +231,11 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 		if newPos then
 			t2 = tServ:Create(indicator, indicatorInfo, { Position = newPos })
 		else
-			local p = pos + Vector3.new(0, 0.2, 0)
+			local p = pos + Vector3.new(0, 1, 0)
 			t2 = tServ:Create(indicator, indicatorInfo, { Position = p })
 		end
+		
+		indicator:SetAttribute("Damage", iDmg)
 
 		t:Play()
 		t2:Play()
@@ -188,8 +244,11 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 		indicator.Handler.Enabled = true
 		indicator.Parent = plr
 		indicator.Position = pos
+		indicator:SetAttribute("Damage", dmg)
 
 		local pitchVal = indicator:FindFirstChild("Pitch")
+
+		math.clamp(math.pow(pitchVal.Value + 0.02, 1.3), 1.0, 2.0)
 
 		local c = sound:Clone()
 		c.Parent = game.SoundService

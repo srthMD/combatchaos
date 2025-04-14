@@ -15,9 +15,9 @@ local function onCharacterAdded(char: Model, plr: Player)
 	end
 
 	local function playSound()
-		local torso = char:FindFirstChild("Torso")
+		local head = char:FindFirstChild("Head")
 
-		if not torso or not torso:IsA("BasePart") then
+		if not head or not head:IsA("BasePart") then
 			return
 		end
 
@@ -29,11 +29,11 @@ local function onCharacterAdded(char: Model, plr: Player)
 		end
 
 		local clone = sound:Clone()
-		clone.Parent = torso
+		clone.Parent = head
 		clone:Play()
 
 		clone.Ended:Wait()
-		clone:Destroy()
+	--	clone:Destroy()
 	end
 
 	humanoid.Died:Once(playSound)

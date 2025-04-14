@@ -1,37 +1,35 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
+
 local Component = require(rStore.Packages.Component)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Plate =
-	Component.new({ Tag = "Plate", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
+local Pistol =
+	Component.new({ Tag = "Carnagecopia", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
 
-local CreateProjectileEvent = rStore.Signals.Client.CreateProjectile
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Plate:Construct()
+function Pistol:Construct()
 	self.debounce = false
 end
 
-function Plate:OnActivate()
+function Pistol:OnActivate()
 	if not self.debounce then
 		self.debounce = true
-
-		local tool: BasePart = self.Instance:FindFirstChild("Handle")
 
 		local hPos = self.Instance.Handle.Position
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		CreateProjectileEvent:Fire("Plate", hPos, dir)
-		tool.Transparency = 1
+		self.Event:Fire("Carnagecopia", hPos, dir)
 
-		task.wait(2.25)
+		cooldownEvent:Fire("Carnagecopia", 6, Color3.fromRGB(25, 200, 25))
+		task.wait(6)
 		self.debounce = false
-		tool.Transparency = 0
 	end
 end
 
-return Plate
+return Pistol

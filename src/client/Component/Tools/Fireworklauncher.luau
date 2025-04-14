@@ -1,32 +1,37 @@
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
+
 local Component = require(rStore.Packages.Component)
+
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Revolver = Component.new({
-	Tag = "Revolver",
+local Fireworklauncher = Component.new({
+	Tag = "Fireworklauncher",
 	Extensions = { OnlyLocalPlayer, Super },
 	Ancestors = { workspace, game.Players },
 })
 
-local equipSound = rStore.Assets.ItemDeps.Revolver.EquipSound
+local equipSound = rStore.Assets.ItemDeps.Fireworklauncher.EquipSound
 
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Revolver:Construct()
+local rand = Random.new(os.time())
+
+function Fireworklauncher:Construct()
 	self.debounce = false
 	self.Animation = Instance.new("Animation")
 	self.Animator = nil
 end
 
-function Revolver:OnEquip()
+function Fireworklauncher:OnEquip()
 	local clone = equipSound:Clone()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.Animation.AnimationId = "rbxassetid://17537676504" -- Set the animation ID
+	self.Animation.AnimationId = "rbxassetid://73345466875357" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
 		self.Animator = humanoid:LoadAnimation(self.Animation)
@@ -35,7 +40,7 @@ function Revolver:OnEquip()
 	end
 end
 
-function Revolver:OnActivate()
+function Fireworklauncher:OnActivate()
 	if not self.debounce then
 		self.debounce = true
 
@@ -43,16 +48,25 @@ function Revolver:OnActivate()
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		self.Event:Fire("Revolver", hPos, dir)
+		for i = 0, 3, 1 do
+			local spread = dir + rand:NextUnitVector() * 0.06
+
+			if i == 0 then
+				self.Event:Fire("Fireworklauncher", hPos, spread, true)
+			else
+				self.Event:Fire("Fireworklauncher", hPos, spread)
+			end
+		end
 
 		-- Play the animation
 		if self.Animator then
 			self.Animator:Play()
 		end
 
-		task.wait(0.8)
+		cooldownEvent:Fire("Fireworklauncher", 3.5, Color3.fromRGB(25, 200, 25))
+		task.wait(3.5)
 		self.debounce = false
 	end
 end
 
-return Revolver
+return Fireworklauncher

@@ -12,6 +12,7 @@ local SBottle =
 
 --> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
+local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
 
 --> Constructor
 function SBottle:Construct()

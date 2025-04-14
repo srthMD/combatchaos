@@ -20,7 +20,7 @@ local CastParams = RaycastParams.new()
 CastParams.FilterType = Enum.RaycastFilterType.Exclude
 
 --in seconds
-local DIFF_DROP_PACKET = 2
+local DIFF_DROP_PACKET = 5
 
 --> Private Functions
 function _fireClientsExcept(exception: Player, ...)
@@ -36,10 +36,10 @@ function HitSomething(plr: Player, userData: { any }, result: {}, velocity: Vect
 	local diff = os.time() - t
 	local packet = userData.Packet :: SharedType.ProjectilePacket
 
-	if diff > DIFF_DROP_PACKET then
-		warn(`Dropped projectile packet from {packet.Owner.Name} because diff was {diff} seconds.`)
-		return
-	end
+	--if diff > DIFF_DROP_PACKET then
+	--	--warn(`Dropped projectile packet from {packet.Owner.Name} because diff was {diff} seconds.`)
+	--	return
+	--end
 
 	packet.Owner = plr
 

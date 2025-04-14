@@ -27,7 +27,7 @@ local Ragdollable = Component.new({
 	},
 })
 
-local DOWN = Vector3.new(0, -3, 0)
+local DOWN = Vector3.new(0, -6, 0)
 
 local rev_Ragdoll = rStore.Signals.Remote.ReplicateRagdoll
 
@@ -117,6 +117,10 @@ end
 
 function Ragdollable:StartRagdoll(recoveryTime: number?, force: Vector3?)
 	if self.Ragdolled then
+		if force then
+			self.Character.Torso:ApplyImpulse(force)
+		end
+		
 		return
 	end
 

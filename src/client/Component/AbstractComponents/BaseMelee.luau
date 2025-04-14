@@ -33,7 +33,9 @@ function BaseMelee.Starting(component)
 	end)
 
 	component.Instance.Equipped:Connect(function()
-		component:OnEquip()
+		if component["OnEquip"] ~= nil and type(component["OnEquip"]) == "function" then
+			component:OnEquip()
+		end
 	end)
 end
 

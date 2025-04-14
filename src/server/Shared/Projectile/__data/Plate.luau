@@ -1,10 +1,12 @@
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
+local Players = game:GetService("Players")
 
 local SharedType = require(rStore.Data.SharedType)
-local Projectiles = require(rStore.Data.Projectiles)
+local Projectiles = require(rStore.Data.Projectiles.Loader)
 
 local urev_HitIndicator = rStore.Signals.Remote.Unreliable.HitIndicator
+local ev_DropWeapon = sStore.Signals.Event.DropWeapon
 local ev_AddKill = sStore.Signals.Event.AddKill
 
 local plateDeps = rStore.Assets.ItemDeps.Plate
@@ -28,7 +30,7 @@ return {
 
 	Hit = function(packet: SharedType.ProjectilePacket, rcr: RaycastResult)
 		local hit = rcr.Instance
-		local info = Projectiles[packet.ProjectileType]
+		local info = Projectiles(packet.ProjectileType)
 
 		local pHum: Humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
 		local baseDamage = info.BaseDamage
@@ -39,6 +41,12 @@ return {
 
 			if pHum.Health <= 0 then
 				ev_AddKill:Fire(packet.Owner)
+				
+				local plr = Players:GetPlayerFromCharacter(pHum.Parent)
+
+				if plr and math.random(1, 4) == 3 then
+					ev_DropWeapon:Fire(plr)
+				end
 			end
 		end
 

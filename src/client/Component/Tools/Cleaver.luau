@@ -4,34 +4,37 @@ local Players = game:GetService("Players")
 local Component = require(rStore.Packages.Component)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Plate =
-	Component.new({ Tag = "Plate", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
+local Cleaver =
+	Component.new({ Tag = "Cleaver", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
 
-local CreateProjectileEvent = rStore.Signals.Client.CreateProjectile
+local equipSound = rStore.Assets.ItemDeps.Cleaver.EquipSound
+
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
-function Plate:Construct()
+function Cleaver:Construct()
 	self.debounce = false
 end
 
-function Plate:OnActivate()
+function Cleaver:OnEquip()
+	local clone = equipSound:Clone()
+	clone.Parent = self.Instance
+	clone:Play()
+end
+
+function Cleaver:OnActivate()
 	if not self.debounce then
 		self.debounce = true
-
-		local tool: BasePart = self.Instance:FindFirstChild("Handle")
 
 		local hPos = self.Instance.Handle.Position
 		local mHit = Mouse.Hit.Position
 		local dir = (mHit - hPos).Unit
 
-		CreateProjectileEvent:Fire("Plate", hPos, dir)
-		tool.Transparency = 1
+		self.Event:Fire("Cleaver", hPos, dir)
 
-		task.wait(2.25)
+		task.wait(1.25)
 		self.debounce = false
-		tool.Transparency = 0
 	end
 end
 
-return Plate
+return Cleaver

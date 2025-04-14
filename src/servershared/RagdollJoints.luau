@@ -18,6 +18,7 @@ local function CreateJoints(model, humanoid)
 			constraint.Attachment0 = objects.attachment0
 			constraint.Attachment1 = objects.attachment1
 			constraint.LimitsEnabled = true
+			constraint.MaxFrictionTorque = 0.025
 			constraint.UpperAngle = objects.limits.UpperAngle
 			constraint.TwistLimitsEnabled = true
 			constraint.TwistLowerAngle = objects.limits.TwistLowerAngle
@@ -29,7 +30,7 @@ local function CreateJoints(model, humanoid)
 	local head = model:FindFirstChild("Head")
 	if head then
 		head.Size = Vector3.new(1, 1, 1)
-		--	head.Shape = 0 -- makes the head sphericla
+			head.Shape = 0 -- makes the head sphericla
 	end
 end
 
