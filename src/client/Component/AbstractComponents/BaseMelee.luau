@@ -37,6 +37,12 @@ function BaseMelee.Starting(component)
 			component:OnEquip()
 		end
 	end)
+
+	component.Instance.Unequipped:Connect(function()
+		if component["OnUnequip"] ~= nil and type(component["OnUnequip"]) == "function" then
+			component:OnUnequip()
+		end
+	end)
 end
 
 --> Module Functions

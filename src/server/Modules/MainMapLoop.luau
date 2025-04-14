@@ -557,14 +557,6 @@ function module.Start()
 		end)
 	end)
 
-	Players.PlayerRemoving:Connect(function(plr)
-		local idx = table.find(playersWithLobbyGP, plr)
-
-		if idx then
-			table.remove(playersWithLobbyGP, idx)
-		end
-	end)
-
 	mapLoop()
 end
 

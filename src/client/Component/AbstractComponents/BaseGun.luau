@@ -34,6 +34,12 @@ function BaseGun.Starting(component)
 			component:OnEquip()
 		end
 	end)
+
+	component.Instance.Unequipped:Connect(function()
+		if component["OnUnequip"] ~= nil and type(component["OnUnequip"]) == "function" then
+			component:OnUnequip()
+		end
+	end)
 end
 
 function BaseGun.Stopping(component)

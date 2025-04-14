@@ -6,7 +6,7 @@ local plr = Players.LocalPlayer
 local assets = rStore.Assets
 
 return function(CoreUI: ScreenGui)
-	local cg = assets.StaticInterface.cg:Clone()
+	local cg = assets.StaticInterface.Abilities:Clone()
 	cg.Parent = CoreUI
 
 	plr.CharacterRemoving:Connect(function(_: Model)

@@ -39,7 +39,8 @@ function HitSomething(cast, result: RaycastResult, velocity: Vector3, inst: Inst
 	inst:Destroy()
 end
 
-function cleanUpInst(inst: Instance)
+function cleanUpInst(inst: BasePart)
+	inst.Anchored = true
 	for _, v in pairs(inst:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = false
@@ -72,6 +73,7 @@ function StepProjectile(
 	if cast.StateInfo.TotalRuntime > cast.UserData.Lifetime then
 		cast:Terminate()
 		cleanUpInst(inst)
+		return
 	end
 
 	inst.Position = lastPoint + (rayDir * displacement)
