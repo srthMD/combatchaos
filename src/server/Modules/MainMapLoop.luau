@@ -1,4 +1,3 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
@@ -9,7 +8,6 @@ local MarketplaceService = game:GetService("MarketplaceService")
 
 local SharedTypes = require(rStore.Data.SharedType)
 
---> Variables
 local votingTime = sStore.VotingTime
 
 local module = {}
@@ -22,6 +20,7 @@ local votingEvents = rStore.Signals.Remote.Voting
 local mapChangedEvent = sStore.Signals.Event.MapChanged
 local sendTime = rStore.Signals.Remote.Unreliable.SendTime
 local votingEffectEvent = rStore.Signals.Remote.Unreliable.VotingEffect
+local sendMapEvent = rStore.Signams.Remote.SendMapName
 
 local playing = sStore.Playing
 
@@ -41,9 +40,9 @@ if RunService:IsStudio() then
 	forcedMap = nil
 end
 
+local curMap: string
 local panGP = 1157645416
 
---> Private Functions
 local function newVoteDict(maps: { string }): SharedTypes.VoteDict
 	local voteDict = {} :: SharedTypes.VoteDict
 
@@ -155,13 +154,7 @@ local function vote(): string
 	local voteStartTime = os.time()
 
 	local plrCon = Players.PlayerAdded:Connect(function(p)
-		votingEvents.VoteStart:FireClient(
-			p,
-			nil,
-			voteDict,
-			(voteStartTime - os.time()) + votingTime.Value,
-			os.time()
-		)
+		votingEvents.VoteStart:FireClient(p, nil, voteDict, (voteStartTime - os.time()) + votingTime.Value, os.time())
 	end)
 
 	task.wait(votingTime.Value)
@@ -209,57 +202,57 @@ end
 local function initMapButtonUI(ui: SurfaceGui, map: string)
 	local main: CanvasGroup = ui.Main
 	local data = rStore.Data.Maps[map]
-	
+
 	if not data then
 		error(`No map data for map {map}.`)
 	end
-	
+
 	main.MapName.Text = map
 	main.MapImage.Image = data.Image.Value
-	main.NumVotes.Text = '0'
+	main.NumVotes.Text = "0"
 end
 
 --Counts how many votes a certian map has recived
-local function countVotes(dict: {[Player]: string?}, map: string): number
+local function countVotes(dict: { [Player]: string? }, map: string): number
 	local votes = 0
-	
+
 	for p, name in dict do
 		if name == nil then
 			continue
 		end
-		
+
 		if name == map then
 			votes += 1
 		end
 	end
-	
+
 	return votes
 end
 
-local function updateCounts(dict: {[Player]: string?}, buttons: {Model})
-	local freq: {[string]: number} = {}
-	
+local function updateCounts(dict: { [Player]: string? }, buttons: { Model })
+	local freq: { [string]: number } = {}
+
 	for p, name in dict do
 		if name == nil then
 			continue
 		end
-		
+
 		if not freq[name] then
 			freq[name] = 1
 		else
 			freq[name] += 1
 		end
 	end
-	
+
 	for _, mdl in pairs(buttons) do
 		local map = mdl:GetAttribute("Map")
-		
+
 		local count = freq[map]
-		
+
 		if not count then
 			count = 0
 		end
-		
+
 		local gui: SurfaceGui = mdl.UI:FindFirstChildWhichIsA("SurfaceGui")
 		local text: TextLabel = gui.Main.NumVotes
 		local str = tostring(count)
@@ -277,24 +270,26 @@ local function mapLoop(): never
 		playing.Value = false
 
 		cleanUp()
-		
+
 		PhysicsService:CollisionGroupSetCollidable("Players", "Players", false)
 
 		if #Players:GetPlayers() == 0 then
 			Players.PlayerAdded:Wait()
 		end
-		
+
 		--this code is horrible but this is cc so i dont care
 		--to anybody else or future me debugging good luck
 		local chosenLobby = lobbies[math.random(1, #lobbies)]:Clone()
 		chosenLobby.Parent = workspace.MainMap
 		local lData = require(lobbyData[chosenLobby.Name].LobbyData)
-		
+		curMap = chosenLobby.Name
+		sendMapEvent:FireAllClients(curMap)
+
 		evnt:FireAllClients(chosenLobby.Name, true)
-		
+
 		local allButtons = CollectionService:GetTagged("LobbyMapButton")
-		local buttons: {Model} = {}
-		
+		local buttons: { Model } = {}
+
 		for _, mdl in pairs(allButtons) do
 			if mdl:IsDescendantOf(workspace.MainMap) then
 				if mdl:FindFirstChild("UI") and mdl:FindFirstChild("Button") then
@@ -304,66 +299,65 @@ local function mapLoop(): never
 				end
 			end
 		end
-		
-		local buttonCons: {RBXScriptConnection} = {}
-		
+
+		local buttonCons: { RBXScriptConnection } = {}
+
 		local pickedMaps = pickRandomMaps(#buttons)
-		local playerVotes: {[Player]: string?} = {}
-		
+		local playerVotes: { [Player]: string? } = {}
+
 		--explicitly set to nil because it makes me feel better :)
 		for _, plr in pairs(Players:GetPlayers()) do
 			playerVotes[plr] = nil
 		end
-		
+
 		evnt:FireAllClients(chosenLobby.Name, true)
-		
+
 		--this code is kinda buggy considering connections are coroutines and technicly "parallel" but i dont care
 		for i, mdl in ipairs(buttons) do
-			local playersOnDebounce = {} :: {Player}
-			
+			local playersOnDebounce = {} :: { Player }
+
 			local button: BasePart = mdl.Button
 			local buttonMap = pickedMaps[i]
 			mdl:AddTag(buttonMap)
 			mdl:SetAttribute("Map", buttonMap)
-			
+
 			local ui: SurfaceGui = mdl.UI:FindFirstChildWhichIsA("SurfaceGui")
 			if not ui then
 				error(`Button in lobby {chosenLobby.Name} has no surfacegui or UI part`)
 			end
 			local text: TextLabel = ui.Main.NumVotes
-			
+
 			initMapButtonUI(ui, buttonMap)
 			button.Color = lData.DefaultColor
-			
+
 			local c = button.Touched:Connect(function(part: BasePart)
 				local plr = Players:GetPlayerFromCharacter(part.Parent)
-				
+
 				if not plr then
 					return
 				end
-				
+
 				if table.find(playersOnDebounce, plr) then
 					return
 				end
-				
+
 				local prevMap = playerVotes[plr]
-				
+
 				if buttonMap == prevMap then
 					return
 				end
-				
+
 				table.insert(playersOnDebounce, plr)
 				task.delay(1, function()
 					local idx = table.find(playersOnDebounce, plr)
-					
-					if not idx then 
+
+					if not idx then
 						return
 					end
-					
+
 					table.remove(playersOnDebounce, idx)
 				end)
-				
-				
+
 				local count = countVotes(playerVotes, buttonMap)
 				if prevMap then
 					count += 1
@@ -371,14 +365,14 @@ local function mapLoop(): never
 				else
 					votingEffectEvent:FireClient(plr, mdl, nil)
 				end
-				
+
 				playerVotes[plr] = buttonMap
 				updateCounts(playerVotes, buttons)
 			end)
-			
+
 			table.insert(buttonCons, c)
 		end
-		
+
 		local water = chosenLobby:FindFirstChild("Water")
 		local fragmentable = chosenLobby:FindFirstChild("Fragmentable")
 
@@ -389,13 +383,13 @@ local function mapLoop(): never
 		if fragmentable then
 			fragmentable.Parent = workspace
 		end
-		
+
 		for _, p in pairs(Players:GetPlayers()) do
 			p:LoadCharacter()
 		end
-		
+
 		local lobbyTime: number = chosenLobby:GetAttribute("LobbyTime") or 30
-		
+
 		local dtPassed = 0
 		while true do
 			local dt = task.wait()
@@ -406,41 +400,41 @@ local function mapLoop(): never
 				sendTime:FireAllClients(lobbyTime)
 				dtPassed = 0
 			end
-			
+
 			if lobbyTime <= 0 then
 				break
 			end
 		end
-		
+
 		for _, con in pairs(buttonCons) do
 			con:Disconnect()
 		end
-		
+
 		buttonCons = nil
-		
+
 		local chosenMap: string
-		local freq: {[string]: number} = {}
+		local freq: { [string]: number } = {}
 		local totalVotes = 0
 		local max = 0
 		for p, map in playerVotes do
 			if map == nil then
 				continue
 			end
-			
+
 			if not freq[map] then
 				freq[map] = 1
 			else
 				freq[map] += 1
 			end
-			
+
 			local votes = freq[map]
 			if votes > max then
 				max = votes
 			end
-			
+
 			totalVotes += 1
 		end
-		
+
 		local maxMaps = {}
 		for map, votes in pairs(freq) do
 			if votes == max then
@@ -453,11 +447,14 @@ local function mapLoop(): never
 		else
 			chosenMap = maxMaps[math.random(1, #maxMaps)]
 		end
-		
+
+		curMap = chosenMap
+		sendMapEvent:FireAllClients(curMap)
+
 		cleanUp(true)
-	
+
 		Players.CharacterAutoLoads = false
-		
+
 		mapChangedEvent:Fire(chosenMap)
 
 		local mapModel: Model = mapFolder:FindFirstChild(chosenMap):Clone()
@@ -484,12 +481,12 @@ local function mapLoop(): never
 
 		if chosenMap == "thirsty town" then
 			local scr = mapModel:FindFirstChild("SunScript")
-			
+
 			if scr and scr:IsA("Script") then
 				scr.Enabled = true
 			end
 		end
-		
+
 		Players.CharacterAutoLoads = true
 
 		for _, v in pairs(Players:GetPlayers()) do
@@ -518,33 +515,32 @@ local function mapLoop(): never
 	end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	PhysicsService:RegisterCollisionGroup("Players")
 	PhysicsService:CollisionGroupSetCollidable("Players", "Players", false)
-	
+
 	Players.PlayerAdded:Connect(function(plr)
 		local suc, has = pcall(function()
 			return MarketplaceService:UserOwnsGamePassAsync(plr.UserId, panGP)
 		end)
-		
+
 		plr.CharacterAppearanceLoaded:Wait()
+
+		sendMapEvent:FireClient(plr, curMap)
 
 		local map = workspace.MainMap:FindFirstChildWhichIsA("Model")
 
 		if map then
 			evnt:FireClient(plr, map.Name, not playing.Value)
 		end
-		
+
 		if not playing.Value then
 			if has then
 				local clone = sStore.Assets.Items.Melee["frying pan"]:Clone()
 				clone.Parent = plr.Backpack
 			end
 		end
-		
+
 		plr.CharacterAdded:Connect(function(char)
 			if not playing.Value then
 				if has then
@@ -552,7 +548,7 @@ function module.Start()
 					clone.Parent = plr.Backpack
 				end
 			end
-			
+
 			for _, part in pairs(char:GetChildren()) do
 				if part:IsA("BasePart") then
 					part.CollisionGroup = "Players"
@@ -560,10 +556,10 @@ function module.Start()
 			end
 		end)
 	end)
-	
+
 	Players.PlayerRemoving:Connect(function(plr)
 		local idx = table.find(playersWithLobbyGP, plr)
-		
+
 		if idx then
 			table.remove(playersWithLobbyGP, idx)
 		end

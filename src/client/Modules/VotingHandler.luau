@@ -159,9 +159,6 @@ local function votingEffect(mdl: Model)
 	end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	event.OnClientEvent:Connect(onMapChange)
 	votingEffectEvent.OnClientEvent:Connect(votingEffect)

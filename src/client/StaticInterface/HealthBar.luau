@@ -13,7 +13,7 @@ local lPlr = game.Players.LocalPlayer
 local events = rStore.Signals
 local assets = rStore.Assets
 
-local mapChangedEvent = rStore.Signals.Remote.OnMapChange
+local mapChangedEvent = rStore.Signals.Remote.SendMapName
 local sendTime = events.Remote.Unreliable.SendTime
 
 local ui: CanvasGroup
