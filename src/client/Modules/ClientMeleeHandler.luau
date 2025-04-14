@@ -27,7 +27,6 @@ local rev_DoCast = eventFolder.Remote.MeleeActivated
 local ev_OnActivate = eventFolder.Client.HandleMelee
 local urev_VisualizeHitbox = eventFolder.Remote.Unreliable.VisualizeHitbox
 local urev_HitIndicator = eventFolder.Remote.Unreliable.HitIndicator
-local rev_ReplicateRagdoll = eventFolder.Remote.ReplicateRagdoll
 local ev_CreateCooldownUi = eventFolder.Client.CreateCooldownUI
 
 local LocalPlayer = Players.LocalPlayer
@@ -52,13 +51,13 @@ function onActivate(melee: string, origin: CFrame, animation: string?, sound: st
 	if not pHum or pHum.Health == 0 then
 		return
 	end
-	
+
 	local data = MeleeData(melee)
-	
+
 	if not data then
 		return
 	end
-	
+
 	if data.Cooldown > 3 then
 		ev_CreateCooldownUi:Fire(data.MeleeName, data.Cooldown, Color3.fromRGB(255, 107, 107))
 	end
@@ -161,7 +160,7 @@ end
 
 function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Model)
 	if dmg < 0 then
-		indicator = indicatorPart:Clone()
+		local indicator = indicatorPart:Clone()
 		indicator.Handler.Enabled = true
 		indicator.Parent = plr
 		indicator.Position = pos
@@ -187,21 +186,21 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 
 		t:Play()
 		t2:Play()
-		
+
 		return
 	end
-	
+
 	local indicator = plr:FindFirstChild("HitInd")
-	
+
 	if indicator then
 		if t then
 			t:Destroy()
 			t2:Destroy()
 		end
-		
+
 		local iDmg: number = indicator:GetAttribute("Damage")
 		iDmg += dmg
-		
+
 		local ui = indicator:FindFirstChildWhichIsA("BillboardGui")
 		local pitchVal = indicator:FindFirstChild("Pitch")
 		indicator:FindFirstChild("Transparency").Value = 0
@@ -221,7 +220,7 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 		indicator.Position = pos
 
 		local text: TextLabel = ui.TLabel
-		
+
 		local str = string.format("%.1f", iDmg)
 		text.Text = "-" .. str
 		text.TextColor3 = Color3.fromRGB(255, 172, 172)
@@ -234,7 +233,7 @@ function handleHitIndicator(dmg: number, pos: Vector3, newPos: Vector3?, plr: Mo
 			local p = pos + Vector3.new(0, 1, 0)
 			t2 = tServ:Create(indicator, indicatorInfo, { Position = p })
 		end
-		
+
 		indicator:SetAttribute("Damage", iDmg)
 
 		t:Play()

@@ -1,9 +1,7 @@
---> Services
 --Im thinking 🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔🤔
 local rStore = game:GetService("ReplicatedStorage")
 local tServ = game:GetService("TweenService")
 
---> Variables
 local module = {}
 
 local plr = game.Players.LocalPlayer
@@ -13,7 +11,7 @@ local MAX_AIR = 8
 --How often the player should be damaged when drowning
 local TICK = 1
 --How much damage should be taken every tick
-local TICK_DMG = 1/9 * 100
+local TICK_DMG = 1 / 9 * 100
 
 -- local ATMO_DISABLED = {
 -- 	Density = 0,
@@ -44,8 +42,6 @@ local underwaterBlur: BlurEffect
 local info = TweenInfo.new(0.6, Enum.EasingStyle.Circular)
 
 local tweens = {}
-
---> Private Functions
 
 local function isDrowning(airTime: number): boolean
 	return underwater and airTime <= 0

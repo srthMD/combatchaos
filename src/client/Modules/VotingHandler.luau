@@ -1,11 +1,9 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local CollectionService = game:GetService("CollectionService")
 
---> Variables
 local module = {}
 
 local buttonInfo = TweenInfo.new(0.3, Enum.EasingStyle.Circular, Enum.EasingDirection.Out)
@@ -21,7 +19,6 @@ local lobbyData = rStore.Data.Lobbies
 local defaultLightingData = require(rStore.Data.DefaultLighting)
 local SharedTypes = require(rStore.Data.SharedType)
 
---> Private Functions
 local function setLighting(lightingData)
 	if lightingData.GlobalWind then
 		workspace.GlobalWind = lightingData.GlobalWind

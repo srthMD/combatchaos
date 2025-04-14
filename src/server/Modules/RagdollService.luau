@@ -1,20 +1,16 @@
---> Services
 local Players = game:GetService("Players")
 local sStore = game:GetService("ServerStorage")
 local rStore = game:GetService("ReplicatedStorage")
 
 local RagdollJoints = require(sStore.Shared.RagdollJoints)
 
---> Module Stuff
 local module = {}
 
---> Variables
 local ev_AddModel = sStore.Signals.Event.AddRagdoll
 local ev_DoRagdoll = sStore.Signals.Event.DoRagdoll
 local rev_ReplicateRagdoll = rStore.Signals.Remote.ReplicateRagdoll
 local rev_ReplicateGetUp = rStore.Signals.Remote.ReplicateGetUp
 
---> Private Functions
 local function addModel(char: Model)
 	local hum = char:FindFirstChildWhichIsA("Humanoid")
 
@@ -67,9 +63,6 @@ local function replicateGetUp(plr: Player, char: Model)
 	end
 end
 
---> Module Functions
-
---> Loader Functions
 function module.Start()
 	ev_AddModel.Event:Connect(addModel)
 	ev_DoRagdoll.Event:Connect(doRagdoll)

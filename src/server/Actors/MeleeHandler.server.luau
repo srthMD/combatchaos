@@ -166,11 +166,11 @@ function doCasts(packet: SharedTypes.MeleePacket, data: SharedTypes.MeleeInfo)
 				task.synchronize()
 
 				ev_OnHit:Fire(data.BackendName, pHum, tool)
-				
+
 				if not data.DoNotTag then
 					pHum:AddTag(packet.Time)
 				end
-				
+
 				local dmg: number
 				local damageType = typeof(data.Damage)
 
@@ -192,9 +192,9 @@ function doCasts(packet: SharedTypes.MeleePacket, data: SharedTypes.MeleeInfo)
 
 				if pHum.Health <= 0 then
 					ev_KillEvent:Fire(packet.Owner)
-					
+
 					local plr = Players:GetPlayerFromCharacter(pHum.Parent)
-					
+
 					if plr and math.random(1, 4) == 3 then
 						ev_DropWeapon:Fire(plr)
 					end

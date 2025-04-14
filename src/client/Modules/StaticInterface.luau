@@ -1,16 +1,9 @@
---> Services
 local Players = game:GetService("Players")
 
---> Variables
 local module = {}
 
 local plr = Players.LocalPlayer
 
---> Private Functions
-
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	local BaseUi = Instance.new("ScreenGui")
 	BaseUi.ResetOnSpawn = false

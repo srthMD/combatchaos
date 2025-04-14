@@ -1,9 +1,7 @@
---> Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
 
---> Variables
 local module = {}
 
 local SharedType = require(ReplicatedStorage.Data.SharedType)
@@ -20,8 +18,6 @@ local rev_Hit = ReplicatedStorage.Signals.Remote.Hit
 
 local CastParams = RaycastParams.new()
 CastParams.FilterType = Enum.RaycastFilterType.Exclude
-
---> Private Functions
 
 function HitSomething(cast, result: RaycastResult, velocity: Vector3, inst: Instance)
 	local t = os.time()
@@ -42,11 +38,6 @@ function HitSomething(cast, result: RaycastResult, velocity: Vector3, inst: Inst
 
 	inst:Destroy()
 end
-
---function ClampMagnitude(v, max)
---	if (v.magnitude == 0) then return Vector3.new(0,0,0) end -- prevents NAN,NAN,NAN
---	return v.Unit * math.min(v.Magnitude, max)
---end
 
 function cleanUpInst(inst: Instance)
 	for _, v in pairs(inst:GetDescendants()) do
@@ -150,45 +141,11 @@ function ReplicateProjectile(packet: SharedType.ProjectilePacket)
 	AddProjectile(packet.Id, pos, packet.Velocity, true, packet.Owner)
 end
 
---function VisualizeServerProjectile(origin: Vector3, dir: Vector3, hit: boolean)
---	local part = Instance.new("Part")
---	part.Name = "ProjectileDbg"
---	part.Size = Vector3.one
---	part.Transparency = 1
---	part.Anchored = true
---	part.CanTouch = false
---	part.CanQuery = false
---	part.CanCollide = false
---	part.Position = origin
-
---	if hit then
---		part.Size = Vector3.one * 2
---		part.BrickColor = BrickColor.Red()
---		part.Transparency = 0.6
---	else
---		local lineAdorn = adornees.Line:Clone()
---		lineAdorn.Adornee = part
---		lineAdorn.CFrame = CFrame.lookAt(dir / 2, dir)
---		lineAdorn.Height = dir.Magnitude
---		lineAdorn.Parent = part
---		lineAdorn.Visible = true
---		lineAdorn.AdornCullingMode = Enum.AdornCullingMode.Never
---	end
-
---	part.Parent = workspace.Debris
---	Debris:AddItem(part, 15)
---end
-
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	Caster.RayHit:Connect(HitSomething)
 	Caster.LengthChanged:Connect(StepProjectile)
-	Caster.CastTerminating:Connect(CastDestroy)
 	ev_CreateProjectile.Event:Connect(AddProjectile)
 	rev_ReplicateProjectile.OnClientEvent:Connect(ReplicateProjectile)
-	--urev_VisualizeProjectile.OnClientEvent:Connect(VisualizeServerProjectile)
 end
 
 return module
