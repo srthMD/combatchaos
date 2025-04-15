@@ -38,8 +38,12 @@ local function doRagdoll(char: Model, recoveryTime: number?, force: Vector3?)
 	local root = char:FindFirstChild("HumanoidRootPart")
 	local torso = char:FindFirstChild("Torso")
 
+	local hasTag = char:HasTag("Ragdolled")
+
 	-- this part is when u see people ragdolling they will smoothly ragdol 😀
-	if root and torso then
+	if root and torso and not hasTag then
+		char:AddTag("Ragdolled")
+
 		-- create attachments
 		local a0 = Instance.new("Attachment")
 		a0.Name = "RagdollAttachmentRoot"
@@ -82,6 +86,8 @@ local function replicateGetUp(plr: Player, char: Model)
 	if not plrChar or char ~= plrChar then
 		return
 	end
+
+	plrChar:RemoveTag()
 
 	local hum = char:FindFirstChildWhichIsA("Humanoid")
 	if not hum or not hum:HasTag("Ragdollable") then
