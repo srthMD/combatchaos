@@ -4,11 +4,13 @@ local Players = game:GetService("Players")
 local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
 
 local Component = require(rStore.Packages.Component)
+
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
 local Sniper = Component.new({
 	Tag = "Sniper",
-	Extensions = { OnlyLocalPlayer, Super },
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
 	Ancestors = { workspace, game.Players },
 })
 
@@ -19,8 +21,14 @@ local Mouse = Player:GetMouse()
 
 function Sniper:Construct()
 	self.debounce = false
-	self.Animation = Instance.new("Animation")
-	self.Animator = nil
+
+	-- shooting animation
+	self.ShootAnimation = Instance.new("Animation")
+	self.ShootAnimator = nil
+
+	-- equip animation
+	self.EquipAnimation = Instance.new("Animation")
+	self.EquipTrack = nil
 end
 
 function Sniper:OnEquip()
@@ -28,12 +36,34 @@ function Sniper:OnEquip()
 	clone.Parent = self.Instance
 	clone:Play()
 
-	self.Animation.AnimationId = "rbxassetid://94943934894680" -- Set the animation ID
 	local humanoid = Player.Character and Player.Character:FindFirstChild("Humanoid")
 	if humanoid then
-		self.Animator = humanoid:LoadAnimation(self.Animation)
+		-- setup shoot anim
+		self.ShootAnimation.AnimationId = "rbxassetid://94943934894680"
+		self.ShootAnimator = humanoid:LoadAnimation(self.ShootAnimation)
+		self.ShootAnimator.Looped = false
+
+		-- setup equip anim
+		self.EquipAnimation.AnimationId = "rbxassetid://77183496146678"
+		self.EquipTrack = humanoid:LoadAnimation(self.EquipAnimation)
+		self.EquipTrack.Looped = false
+		self.EquipTrack:Play()
 	else
 		warn("Humanoid not found in character.")
+	end
+end
+
+function Sniper:OnUnequip()
+	if self.EquipTrack then
+		self.EquipTrack:Stop()
+		self.EquipTrack:Destroy()
+		self.EquipTrack = nil
+	end
+
+	if self.ShootAnimator then
+		self.ShootAnimator:Stop()
+		self.ShootAnimator:Destroy()
+		self.ShootAnimator = nil
 	end
 end
 
@@ -47,9 +77,9 @@ function Sniper:OnActivate()
 
 		self.Event:Fire("Sniper", hPos, dir)
 
-		-- Play the animation
-		if self.Animator then
-			self.Animator:Play()
+		-- play shooting animation
+		if self.ShootAnimator then
+			self.ShootAnimator:Play()
 		end
 
 		cooldownEvent:Fire("Sniper", 4.3, Color3.fromRGB(25, 200, 25))

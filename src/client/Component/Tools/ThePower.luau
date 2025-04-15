@@ -4,10 +4,15 @@ local Players = game:GetService("Players")
 local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
 
 local Component = require(rStore.Packages.Component)
+
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Pistol =
-	Component.new({ Tag = "ThePower", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
+local Pistol = Component.new({
+	Tag = "ThePower",
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
+	Ancestors = { workspace, game.Players },
+})
 
 local equipSound = rStore.Assets.ItemDeps.ThePower.EquipSound
 

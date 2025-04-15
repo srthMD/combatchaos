@@ -210,7 +210,7 @@ function withRobloxExplosion(
 	pos: Vector3,
 	shooter_hum: Humanoid
 )
-	local part = Instance.fromExisting(script.emitter)
+	local part = Instance.fromExisting(emitterPart)
 	part.Name = "explosion"
 	part.Position = pos
 

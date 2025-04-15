@@ -1,22 +1,18 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Component Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
---> Class Definition
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
 local Parasol = Component.new({
 	Tag = "ParasolMelee",
-	Extensions = { OnlyLocalPlayer, Super },
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
 	Ancestors = { workspace, game.Players },
 })
 
---> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
---> Cosnstructor
 function Parasol:Cosnstruct()
 	self.Debounce = false
 	self.EquipDB = false
@@ -28,11 +24,11 @@ function Parasol:OnActivate(): ()
 	if self.EquipDB == true then
 		return
 	end
-	
+
 	if self.Debounce == true then
 		return
 	end
-	
+
 	self.Debounce = true
 
 	local hrp: BasePart = self.Instance.Parent:FindFirstChild("HumanoidRootPart")
@@ -41,7 +37,7 @@ function Parasol:OnActivate(): ()
 	if self.Phase == nil then
 		self.Phase = 0
 	end
-	
+
 	self.Phase += 1
 
 	if self.Phase > 4 then

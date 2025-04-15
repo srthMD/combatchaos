@@ -3,11 +3,13 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
 local Component = require(rStore.Packages.Component)
+
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
 local Romanianrifle = Component.new({
 	Tag = "Romanianrifle",
-	Extensions = { OnlyLocalPlayer, Super },
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
 	Ancestors = { workspace, game.Players },
 })
 

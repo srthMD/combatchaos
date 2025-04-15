@@ -1,6 +1,5 @@
 local module = {} -- Joints made by roblox from the drooling zombie model
 local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
 
 local RigTypes = require(script.Parent.RigTypes)
 
@@ -30,7 +29,7 @@ local function CreateJoints(model, humanoid)
 	local head = model:FindFirstChild("Head")
 	if head then
 		head.Size = Vector3.new(1, 1, 1)
-			head.Shape = 0 -- makes the head sphericla
+		--head.Shape = 0 -- makes the head sphericla
 	end
 end
 

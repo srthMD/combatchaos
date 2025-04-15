@@ -8,7 +8,7 @@ function BaseGun.Constructing(component)
 	local backendName = component.Instance:GetAttribute("backendProjectileName")
 
 	if backendName == nil or typeof(backendName) ~= "string" then
-		error(`{component.Instance.Name} does not have attribute backendProjectileName, or is not of type string.`)
+		error(`{component.Instance.Name} does not have attribute backendProjectileNameName, or is not of type string.`)
 		return
 	end
 
@@ -22,24 +22,6 @@ function BaseGun.Constructing(component)
 	end
 
 	component["Event"] = rStore.Signals.Client.CreateProjectile
-end
-
-function BaseGun.Starting(component)
-	component.Instance.Activated:Connect(function()
-		component:OnActivate()
-	end)
-
-	component.Instance.Equipped:Connect(function()
-		if component["OnEquip"] ~= nil and type(component["OnEquip"]) == "function" then
-			component:OnEquip()
-		end
-	end)
-
-	component.Instance.Unequipped:Connect(function()
-		if component["OnUnequip"] ~= nil and type(component["OnUnequip"]) == "function" then
-			component:OnUnequip()
-		end
-	end)
 end
 
 function BaseGun.Stopping(component)

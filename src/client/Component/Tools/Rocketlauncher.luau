@@ -4,10 +4,15 @@ local Players = game:GetService("Players")
 local cooldownEvent = rStore.Signals.Client.CreateCooldownUI
 
 local Component = require(rStore.Packages.Component)
+
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseGun)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
-local Rocketlauncher =
-	Component.new({ Tag = "Rocketlauncher", Extensions = { OnlyLocalPlayer, Super }, Ancestors = { workspace, game.Players } })
+local Rocketlauncher = Component.new({
+	Tag = "Rocketlauncher",
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
+	Ancestors = { workspace, game.Players },
+})
 
 local equipSound = rStore.Assets.ItemDeps.Rocketlauncher.EquipSound
 

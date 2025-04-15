@@ -5,11 +5,12 @@ local rStore = game:GetService("ReplicatedStorage")
 local Component = require(rStore.Packages.Component)
 
 --> Class Definition
+local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
 local Pitchfork = Component.new({
 	Tag = "Dashmelee",
-	Extensions = { OnlyLocalPlayer, Super },
+	Extensions = { OnlyLocalPlayer, Super, BaseTool },
 	Ancestors = { workspace, game.Players },
 })
 
@@ -28,11 +29,11 @@ function Pitchfork:OnActivate(): ()
 	if self.EquipDB == true then
 		return
 	end
-	
+
 	if self.Debounce == true then
 		return
 	end
-	
+
 	self.Debounce = true
 
 	local hrp: BasePart = self.Instance.Parent:FindFirstChild("HumanoidRootPart")
@@ -41,7 +42,7 @@ function Pitchfork:OnActivate(): ()
 	if self.Phase == nil then
 		self.Phase = 1
 	end
-	
+
 	self.Phase += 1
 
 	if self.Phase > 1 then
