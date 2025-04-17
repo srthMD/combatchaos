@@ -87,7 +87,7 @@ local function replicateGetUp(plr: Player, char: Model)
 		return
 	end
 
-	plrChar:RemoveTag()
+	plrChar:RemoveTag("Ragdolled")
 
 	local hum = char:FindFirstChildWhichIsA("Humanoid")
 	if not hum or not hum:HasTag("Ragdollable") then
