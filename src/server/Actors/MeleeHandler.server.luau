@@ -20,8 +20,6 @@ local ev_DropWeapon = serverEventFolder.DropWeapon
 
 local SharedTypes = require(rStore.Data.SharedType)
 
-local ACIncrement = sStore.Signals.AC.AddOrIncrement
-
 local Melees = require(rStore.Data.Melee.Loader)
 
 local actor = script:GetActor()
@@ -35,7 +33,7 @@ local PERCENT_VELOCITY_COMPENCATION = 0.60
 local PERCENT_MAX_HITBOX_EXTENSION = 0.7
 
 function originIsAcceptable(origin: CFrame, hrpCFrame: CFrame): boolean
-	if math.abs((origin.Position - hrpCFrame.Position).Magnitude) > 5 then
+	if math.abs((origin.Position - hrpCFrame.Position).Magnitude) > 20 then
 		return false
 	end
 
@@ -47,29 +45,26 @@ function validate(plr: Player, packet: SharedTypes.MeleePacket)
 	local packetOwner = packet.Owner
 
 	if not meleeData then
-		ACIncrement:Fire(plr, "Melee", "InvalidData")
 		return
 	end
 
 	if packetOwner ~= plr then
-		ACIncrement:Fire(plr, "Melee", "InvalidOwner")
 		return
 	end
 
 	local char = plr.Character
+
 	if not char then
-		ACIncrement:Fire(plr, "Melee", "InstanceIsNil")
 		return
 	end
 
 	local pHum = char:FindFirstChildWhichIsA("Humanoid")
 	if not pHum then
-		ACIncrement:Fire(plr, "Melee", "InstanceIsNil")
 		return
 	end
 
 	if pHum.Health == 0 then
-		ACIncrement:Fire(plr, "Melee", "AttackWhenDead")
+		return
 	end
 
 	local hrp: BasePart = char:FindFirstChild("HumanoidRootPart")
@@ -78,7 +73,7 @@ function validate(plr: Player, packet: SharedTypes.MeleePacket)
 	end
 
 	if not originIsAcceptable(packet.Origin, hrp.CFrame) then
-		ACIncrement:Fire(plr, "Melee", "OriginDifference")
+		return
 	end
 
 	doCasts(packet, meleeData)
