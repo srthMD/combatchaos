@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local CollectionService = game:GetService("CollectionService")
+local SoundService = game:GetService("SoundService")
 
 local module = {}
 
@@ -19,6 +20,8 @@ local lobbyData = rStore.Data.Lobbies
 local defaultLightingData = require(rStore.Data.DefaultLighting)
 local SharedTypes = require(rStore.Data.SharedType)
 
+local musicSoundGroup: SoundGroup = SoundService.Music
+
 local function setLighting(lightingData)
 	if lightingData.GlobalWind then
 		workspace.GlobalWind = lightingData.GlobalWind
@@ -34,8 +37,15 @@ local function setLighting(lightingData)
 	end
 end
 
+local musicThread: thread?
+
 local function onMapChange(mapName: string, isLobby: boolean?)
 	local mapDataFolder: Folder
+
+	musicSoundGroup:ClearAllChildren()
+	if musicThread then
+		task.cancel(musicThread)
+	end
 
 	if isLobby then
 		mapDataFolder = lobbyData:FindFirstChild(mapName)
@@ -47,6 +57,7 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 		setLighting(defaultLightingData)
 		warn(`Map "{mapName}" does not have corresponding mapData folder!`)
 	else
+		local tracks = mapDataFolder:FindFirstChild("Tracks")
 		local lightingData = mapDataFolder:FindFirstChild("Lighting")
 		local ui = mapDataFolder:FindFirstChild("UI")
 		local postFx = mapDataFolder:FindFirstChild("PostEffects")
@@ -100,6 +111,47 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 				c.Enabled = true
 			end
 			c.Parent = game.Lighting
+		end
+
+		if tracks then
+			local sounds: { Sound } = {}
+			for _, inst in pairs(tracks:GetChildren()) do
+				if inst:IsA("Sound") then
+					local clone = inst:Clone()
+					clone.Parent = musicSoundGroup
+					table.insert(sounds, clone)
+				end
+			end
+
+			if #sounds ~= 0 then
+				if #sounds == 1 then
+					local s = sounds[1]
+					s:Play()
+					s.Looped = true
+				else
+					musicThread = task.spawn(function()
+						local idx = 1
+
+						while true do
+							if idx > #sounds then
+								idx = 1
+							end
+
+							local s = sounds[idx]
+
+							local waitTime: number? = s:GetAttribute("WaitTimeBeforeStart")
+
+							if waitTime then
+								task.wait(waitTime)
+							end
+
+							s:Play()
+							s.Ended:Wait()
+							idx += 1
+						end
+					end)
+				end
+			end
 		end
 	end
 end
