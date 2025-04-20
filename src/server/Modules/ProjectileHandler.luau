@@ -1,13 +1,7 @@
--- @title: Server Projectile Handler
--- @author: qweekertom
--- @date: 2.29.2024
-
---> Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
---> Variables
 local module = {}
 
 local SharedType = require(ReplicatedStorage.Data.SharedType)
@@ -22,7 +16,6 @@ CastParams.FilterType = Enum.RaycastFilterType.Exclude
 --in seconds
 local DIFF_DROP_PACKET = 5
 
---> Private Functions
 function _fireClientsExcept(exception: Player, ...)
 	for _, player in Players:GetPlayers() do
 		if player == exception then
