@@ -35,7 +35,7 @@ end
 
 --> Loader Methods
 function module.Start()
-	r_respawn.OnServerEvent:Connect(respawn)
+	--r_respawn.OnServerEvent:Connect(respawn)
 end
 
 return module
