@@ -3,7 +3,7 @@ local TweenService = game:GetService("TweenService")
 local info = TweenInfo.new(0.08, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
 local MAX_AS_SCALE = 0.1
-local MIN_AS_SCALE = -1
+local MIN_AS_SCALE = -0.9
 local BASE_HUE = 0.35
 local BASE_SAT = 0.75
 local BASE_VALUE = 0.85
@@ -17,6 +17,8 @@ local mapChangedEvent = rStore.Signals.Remote.SendMapName
 local sendTime = events.Remote.Unreliable.SendTime
 
 local ui: CanvasGroup
+
+local mapName: string?
 
 local function characterAdd(char: Model)
 	local hum = char:WaitForChild("Humanoid", 6)
@@ -63,15 +65,19 @@ local function characterAdd(char: Model)
 end
 
 local function setTime(t: number)
-	local label: TextLabel = ui.Info1.Time
+	local label: TextLabel = ui.Info1.MapName
 
-	label.Text = string.format("%d", t)
+	local str = mapName
+
+	if not mapName then
+		str = "???"
+	end
+
+	label.Text = string.format("%s - %d", str, t)
 end
 
 local function changeMapName(name: string)
-	local label = ui.Info1.MapName
-
-	label.Text = name
+	mapName = name
 end
 
 return function(CoreUI: ScreenGui)

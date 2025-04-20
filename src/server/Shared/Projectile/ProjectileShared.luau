@@ -245,12 +245,6 @@ function withRobloxExplosion(
 		if data.Damage ~= 0 then
 			if data.SelfHitRules.ApplyDamage and shooter_hum == hum then
 				hum:TakeDamage(data.Damage)
-
-				if data.SelfHitRules.DoRagdoll then
-					if force ~= 0 then
-						ev_DoRagdoll:Fire(hum.Parent, data.RagdollInfo.RecoveryTime, nil)
-					end
-				end
 			elseif shooter_hum ~= hum then
 				hum:TakeDamage(data.Damage)
 
@@ -266,6 +260,12 @@ function withRobloxExplosion(
 				end
 
 				urev_HitIndicator:FireClient(packet.Owner, data.Damage, o_pos, hitIndPos, hum.Parent)
+			end
+		end
+
+		if data.SelfHitRules.DoRagdoll then
+			if force ~= 0 then
+				ev_DoRagdoll:Fire(hum.Parent, data.RagdollInfo.RecoveryTime, nil)
 			end
 		end
 
