@@ -18,7 +18,7 @@ function module.Start()
 			if not state then
 				hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 
-				task.delay(2, function()
+				task.delay(1, function()
 					hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
 				end)
 			end
