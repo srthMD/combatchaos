@@ -16,7 +16,6 @@ local OldSchool = Component.new({
 
 local equipSound = rStore.Assets.ItemDeps["OldSchool Pistol"].EquipSound
 local reloadSound = rStore.Assets.ItemDeps["OldSchool Pistol"].ReloadSound
-local fireSound = rStore.Assets.ItemDeps["OldSchool Pistol"].Fire
 local abilityFrame = rStore.Assets.StaticInterface.Ability
 
 local Player = Players.LocalPlayer
@@ -135,14 +134,6 @@ function OldSchool:OnActivate()
 		local dir = (mHit - hPos).Unit
 
 		self.Event:Fire("OldSchoolBullet", hPos, dir)
-
-		-- 🔊 Play fire sound
-		if fireSound then
-			local fireClone = fireSound:Clone()
-			fireClone.Parent = self.Instance.Handle
-			fireClone:Play()
-			Debris:AddItem(fireClone, 5)
-		end
 
 		-- 🎞️ Play shoot animation with Action priority
 		if self.Animator and self.shootAnim.AnimationId ~= "" then

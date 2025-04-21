@@ -14,22 +14,22 @@ return function(CoreUI: ScreenGui)
 	local muteIcon: ImageButton = rStore.Assets.StaticInterface.Mute:Clone()
 	muteIcon.Parent = CoreUI
 
-	local musicSoundGroup: SoundGroup? = SoundService:FindFirstChild("Music")
+	local musicPlayer: AudioPlayer? = SoundService:FindFirstChild("Music")
 
 	local muted = false
-	if musicSoundGroup then
+	if musicPlayer then
 		muteIcon.MouseButton1Click:Connect(function()
 			if muted then
 				muted = false
 				muteIcon.Image = onID
-				musicSoundGroup.Volume = 1
+				musicPlayer.Volume = 1
 			else
 				muted = true
 				muteIcon.Image = offID
-				musicSoundGroup.Volume = 0
+				musicPlayer.Volume = 0
 			end
 		end)
 	else
-		warn("MuteButton: Could not find music sound group.")
+		warn("MuteButton: Could not find music AudioPlayer.")
 	end
 end

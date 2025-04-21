@@ -20,7 +20,10 @@ local lobbyData = rStore.Data.Lobbies
 local defaultLightingData = require(rStore.Data.DefaultLighting)
 local SharedTypes = require(rStore.Data.SharedType)
 
-local musicSoundGroup: SoundGroup = SoundService.Music
+local musicPlayer: AudioPlayer = SoundService.Music
+local musicOutput: AudioDeviceOutput = SoundService.MusicOutput
+local defaultWire: Wire? = musicOutput.Music
+local musicThread: thread?
 
 local function setLighting(lightingData)
 	if lightingData.GlobalWind then
@@ -37,14 +40,63 @@ local function setLighting(lightingData)
 	end
 end
 
-local musicThread: thread?
+local function setUpSoundEffects(sound: Sound)
+	local lastEffect: Instance = musicPlayer
+	local lastWire: Wire?
+
+	local effects = {}
+
+	for _, inst in pairs(sound:GetChildren()) do
+		--ROBLOX WHY DO THESE SOUND EFFECTS NOT HAVE ONE COMMON ABSTRACT CLASS FUCK YOU
+		if inst["WiringChanged"] ~= nil then
+			table.insert(effects, inst)
+		end
+	end
+
+	if #effects ~= 0 then
+		defaultWire:Destroy()
+
+		for _, effect in ipairs(sound:GetChildren()) do
+			local clone = effect:Clone()
+			clone.Parent = musicPlayer
+
+			local wire = Instance.new("Wire")
+			wire.Parent = clone
+			wire.SourceInstance = lastEffect
+
+			if lastWire then
+				lastWire.TargetInstance = clone
+			end
+
+			lastWire = wire
+		end
+	end
+
+	(lastWire :: Wire).TargetInstance = musicOutput
+end
+
+local function createDefaultWire()
+	local wire = Instance.new("Wire")
+	wire.Parent = musicOutput
+	wire.SourceInstance = musicPlayer
+	wire.TargetInstance = musicOutput
+	wire.Name = "Music"
+	defaultWire = wire
+end
 
 local function onMapChange(mapName: string, isLobby: boolean?)
 	local mapDataFolder: Folder
 
-	musicSoundGroup:ClearAllChildren()
 	if musicThread then
 		task.cancel(musicThread)
+	end
+
+	musicPlayer:Stop()
+	musicPlayer.Asset = ""
+	musicPlayer.Looping = false
+
+	if not defaultWire then
+		createDefaultWire()
 	end
 
 	if isLobby then
@@ -117,17 +169,17 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 			local sounds: { Sound } = {}
 			for _, inst in pairs(tracks:GetChildren()) do
 				if inst:IsA("Sound") then
-					local clone = inst:Clone()
-					clone.Parent = musicSoundGroup
-					table.insert(sounds, clone)
+					table.insert(sounds, inst)
 				end
 			end
 
 			if #sounds ~= 0 then
 				if #sounds == 1 then
-					local s = sounds[1]
-					s:Play()
-					s.Looped = true
+					local sound = sounds[1]
+					setUpSoundEffects(sound)
+					musicPlayer.Asset = sound.SoundId
+					musicPlayer:Play()
+					musicPlayer.Looping = true
 				else
 					musicThread = task.spawn(function()
 						local idx = 1
@@ -137,16 +189,21 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 								idx = 1
 							end
 
-							local s = sounds[idx]
+							musicPlayer:ClearAllChildren()
 
-							local waitTime: number? = s:GetAttribute("WaitTimeBeforeStart")
+							local sound = sounds[idx]
+							setUpSoundEffects(sound)
+							musicPlayer.Asset = sound.SoundId
+
+							local waitTime: number? = sound:GetAttribute("DelayTimeBeforePlay")
 
 							if waitTime then
 								task.wait(waitTime)
 							end
 
-							s:Play()
-							s.Ended:Wait()
+							musicPlayer:Play()
+							musicPlayer.Ended:Wait()
+
 							idx += 1
 						end
 					end)

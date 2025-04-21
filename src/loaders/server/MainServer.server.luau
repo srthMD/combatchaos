@@ -7,8 +7,7 @@ Loader.SpawnAll(
 	Loader.LoadChildren(ServerStorage.Server.Modules, function(module: ModuleScript): boolean
 		local attr = module:GetAttribute("Load")
 
-		--do this instead of return attr to handle when the attribute is nil
-		if attr == false then
+		if not attr then
 			return false
 		end
 
