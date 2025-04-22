@@ -94,6 +94,7 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 	musicPlayer:Stop()
 	musicPlayer.Asset = ""
 	musicPlayer.Looping = false
+	musicPlayer.TimePosition = 0
 
 	if not defaultWire then
 		createDefaultWire()
@@ -190,6 +191,7 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 							end
 
 							musicPlayer:ClearAllChildren()
+							musicPlayer.TimePosition = 0
 
 							local sound = sounds[idx]
 							setUpSoundEffects(sound)
