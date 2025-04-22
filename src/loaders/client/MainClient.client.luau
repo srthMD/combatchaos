@@ -6,7 +6,7 @@ Loader.SpawnAll(
 	Loader.LoadChildren(ReplicatedStorage.Client.Modules, function(module: ModuleScript): boolean
 		local attr = module:GetAttribute("Load")
 
-		if not attr then
+		if attr == false then
 			return false
 		end
 

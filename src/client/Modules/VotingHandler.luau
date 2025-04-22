@@ -70,9 +70,9 @@ local function setUpSoundEffects(sound: Sound)
 
 			lastWire = wire
 		end
-	end
 
-	(lastWire :: Wire).TargetInstance = musicOutput
+		(lastWire :: Wire).TargetInstance = musicOutput
+	end
 end
 
 local function createDefaultWire()
