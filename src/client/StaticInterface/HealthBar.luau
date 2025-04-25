@@ -140,17 +140,16 @@ local function characterAdd(char: Model)
 	end)
 
 	con3 = hum.StateChanged:Connect(function(old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
-		print(new.Name)
-
 		if
 			(
 				new == Enum.HumanoidStateType.Landed
 				or new == Enum.HumanoidStateType.Climbing
 				or new == Enum.HumanoidStateType.Swimming
 				or new == Enum.HumanoidStateType.Swimming
+				or new == Enum.HumanoidStateType.PlatformStanding
 			) and (old == Enum.HumanoidStateType.Freefall or old == Enum.HumanoidStateType.Jumping)
 		then
-			--should not run if already regenning, the jumped connection should cancel it instead before running again
+			--should not run if already regenerating, the jumped connection should cancel it instead before running again
 			if charges > 0 and not __t then
 				__t = task.delay(JUMP_COOLDOWN_TIME, function()
 					hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
