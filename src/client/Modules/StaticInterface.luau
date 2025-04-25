@@ -13,10 +13,12 @@ function module.Start()
 
 	for _, v in pairs(script.Parent.Parent.StaticInterface:GetChildren()) do
 		if v:IsA("ModuleScript") then
-			if v.Name == "AdminUi" then
-				continue
+			local f = require(v)
+			local suc, res = pcall(f, BaseUi)
+
+			if not suc then
+				warn(`Error in {v.Name}: \n{res}`)
 			end
-			require(v)(BaseUi)
 		end
 	end
 end
