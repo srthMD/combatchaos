@@ -50,7 +50,7 @@ function Pistol:OnActivate()
 			track:Play()
 		end
 
-		cooldownEvent:Fire("CoolStoryAirConditioner", 7, Color3.fromRGB(25, 200, 25))
+		cooldownEvent:Fire("CoolStoryAirConditioner", 8.5, Color3.fromRGB(25, 200, 25))
 		task.wait(8.5)
 		self.debounce = false
 	end

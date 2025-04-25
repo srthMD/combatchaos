@@ -69,6 +69,7 @@ local function setUpSoundEffects(sound: Sound)
 			end
 
 			lastWire = wire
+			lastEffect = clone
 		end
 
 		(lastWire :: Wire).TargetInstance = musicOutput
@@ -95,6 +96,7 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 	musicPlayer.Asset = ""
 	musicPlayer.Looping = false
 	musicPlayer.TimePosition = 0
+	musicPlayer:ClearAllChildren()
 
 	if not defaultWire then
 		createDefaultWire()
