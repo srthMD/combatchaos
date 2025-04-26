@@ -93,8 +93,10 @@ local function characterAdd(char: Model)
 	local regenThread: thread?
 	local regenTween: Tween?
 	local __t: thread?
+	local lock = false
 	con2 = hum.Jumping:Connect(function(state: boolean)
 		if state then
+			lock = true
 			hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 
 			if __t then
@@ -102,6 +104,7 @@ local function characterAdd(char: Model)
 				__t = nil
 			end
 
+			local doubleDeplete = false
 			if regenThread then
 				task.cancel(regenThread)
 				regenThread = nil
@@ -109,6 +112,10 @@ local function characterAdd(char: Model)
 				if regenTween then
 					regenTween:Pause()
 					regenTween = nil
+				end
+
+				if charges > 5 then
+					return
 				end
 
 				local prevBar: Frame = staminaBar[tostring(charges + 1)]
@@ -126,30 +133,47 @@ local function characterAdd(char: Model)
 
 				--if the charge was almost regenerated just use that charge instead
 				if transparency < 0.3 then
+					charges = tonumber(prevBar.Name) or charges
 					return
 				end
+
+				doubleDeplete = true
 			end
 
 			if charges > 0 then
 				local barToDeplete: Frame = staminaBar[tostring(charges)]
-				TweenService:Create(barToDeplete, depleteBarInfo, { BackgroundTransparency = 1 }):Play()
+				local t = TweenService:Create(barToDeplete, depleteBarInfo, { BackgroundTransparency = 1 })
+
+				if doubleDeplete then
+					task.wait(0.075)
+				end
+
+				t:Play()
 
 				charges = math.clamp(charges - 1, 0, 5)
 			end
+
+			lock = false
 		end
 	end)
 
 	con3 = hum.StateChanged:Connect(function(old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
 		if
-			(
-				new == Enum.HumanoidStateType.Landed
-				or new == Enum.HumanoidStateType.Climbing
-				or new == Enum.HumanoidStateType.Swimming
-				or new == Enum.HumanoidStateType.Swimming
-				or new == Enum.HumanoidStateType.PlatformStanding
-			) and (old == Enum.HumanoidStateType.Freefall or old == Enum.HumanoidStateType.Jumping)
+			new == Enum.HumanoidStateType.Landed
+			or new == Enum.HumanoidStateType.Climbing
+			or new == Enum.HumanoidStateType.Swimming
+			or new == Enum.HumanoidStateType.PlatformStanding
+			or new == Enum.HumanoidStateType.Running
+			or new == Enum.HumanoidStateType.Seated
 		then
-			--should not run if already regenerating, the jumped connection should cancel it instead before running again
+			if regenThread then
+				return
+			end
+
+			if charges >= 5 then
+				return
+			end
+
 			if charges > 0 and not __t then
 				__t = task.delay(JUMP_COOLDOWN_TIME, function()
 					hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
@@ -157,19 +181,26 @@ local function characterAdd(char: Model)
 				end)
 			end
 
-			if regenThread then
-				task.cancel(regenThread)
-			end
-
-			if charges > 5 then
-				return
-			end
-
 			regenThread = task.spawn(function()
-				task.wait(WAIT_UNTIL_REGEN)
+				local t = WAIT_UNTIL_REGEN
+
+				--getting up from ragdoll
+				if old == Enum.HumanoidStateType.GettingUp then
+					t *= 1.5
+				--swimming
+				elseif new == Enum.HumanoidStateType.Swimming then
+					t *= 1.2
+				end
+
+				task.wait(t)
 
 				local chargesAdded = 0
 				while charges < 5 do
+					if lock then
+						regenThread = nil
+						return
+					end
+
 					local barToRegen: Frame = staminaBar[tostring(charges + 1)]
 
 					local bonus = 0
@@ -194,6 +225,11 @@ local function characterAdd(char: Model)
 
 				regenThread = nil
 			end)
+		elseif new ~= Enum.HumanoidStateType.FallingDown or new ~= Enum.HumanoidStateType.Freefall then
+			if regenThread then
+				task.cancel(regenThread)
+				regenThread = nil
+			end
 		end
 	end)
 end
