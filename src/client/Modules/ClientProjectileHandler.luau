@@ -23,20 +23,17 @@ function HitSomething(cast, result: RaycastResult, velocity: Vector3, inst: Inst
 	local t = os.time()
 	local packet = cast.UserData.Packet
 
-	if packet.Owner == false then
-		inst:Destroy()
-		return
+	if packet.Owner == true then
+		rev_Hit:FireServer(
+			cast.UserData,
+			{ Instance = result.Instance, Position = result.Position, Material = result.Material },
+			velocity,
+			inst,
+			t
+		)
 	end
 
-	rev_Hit:FireServer(
-		cast.UserData,
-		{ Instance = result.Instance, Position = result.Position, Material = result.Material },
-		velocity,
-		inst,
-		t
-	)
-
-	inst:Destroy()
+	cleanUpInst(inst)
 end
 
 function cleanUpInst(inst: BasePart)

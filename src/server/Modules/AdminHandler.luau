@@ -1,10 +1,8 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 local dsService = game:GetService("DataStoreService")
 
---> Variables
 local module = {}
 local signals = {}
 local isStudio = game:GetService("RunService"):IsStudio()
@@ -22,7 +20,6 @@ local s_hasAdmin = sStore.Signals.Functions.hasAdmin
 local hasAdmin = rStore.Signals.Remote.isAdmin
 local getCommands = rStore.Signals.Remote.getCommands
 
---> Private Functions
 function onPlayerAdd(plr: Player): ()
 	local ds
 
@@ -170,9 +167,6 @@ function insertSpaces(str: string): string
 	return finalStr
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	remoteFunc.OnInvoke = function(plr: Player)
 		return funcModule.Init(plr)

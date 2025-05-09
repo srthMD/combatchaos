@@ -33,7 +33,7 @@ local function onCharacterAdded(char: Model, plr: Player)
 		clone:Play()
 
 		clone.Ended:Wait()
-	--	clone:Destroy()
+		--	clone:Destroy()
 	end
 
 	humanoid.Died:Once(playSound)

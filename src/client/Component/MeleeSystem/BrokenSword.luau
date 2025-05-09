@@ -1,10 +1,7 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Component Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
---> Class Definition
 local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
@@ -14,18 +11,15 @@ local BrokenSword = Component.new({
 	Ancestors = { workspace, game.Players },
 })
 
---> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 local LUNGE_IMPULSE = Vector3.new(0, 0.6, -0.6) * 1000
 
---> Constructor
 function BrokenSword:Construct()
 	self.EquipDB = false
 	self.Debounce = false
 	self.lastAttackTime = 0
 end
 
---> Private Functions
 local function Lunge(hrp: BasePart)
 	local pos = hrp.CFrame
 	local translatedVelocity = pos:VectorToWorldSpace(LUNGE_IMPULSE)
@@ -33,7 +27,6 @@ local function Lunge(hrp: BasePart)
 	hrp:ApplyImpulse(translatedVelocity)
 end
 
---> Module Functions
 function BrokenSword:OnActivate()
 	if self.EquipDB == true then
 		return

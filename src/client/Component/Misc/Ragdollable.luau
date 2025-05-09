@@ -1,4 +1,3 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local rServ = game:GetService("RunService")
@@ -6,7 +5,6 @@ local StarterGui = game:GetService("StarterGui")
 
 local rev_ReplicateGetUp = rStore.Signals.Remote.ReplicateGetUp
 
---> self Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
 local Ragdollable = Component.new({
@@ -120,7 +118,7 @@ function Ragdollable:StartRagdoll(recoveryTime: number?, force: Vector3?)
 		if force then
 			self.Character.Torso:ApplyImpulse(force)
 		end
-		
+
 		return
 	end
 

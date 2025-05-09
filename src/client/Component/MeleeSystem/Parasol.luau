@@ -19,7 +19,6 @@ function Parasol:Cosnstruct()
 	self.Phase = 0
 end
 
---> Module Functions
 function Parasol:OnActivate(): ()
 	if self.EquipDB == true then
 		return

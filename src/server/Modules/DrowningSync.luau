@@ -1,12 +1,9 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Variables
 local module = {}
 
 local syncEvent = rStore.Signals.Remote.SyncDrowning
 
---> Private Functions
 function sync(plr: Player, hp: number)
 	if type(hp) ~= "number" then
 		return
@@ -26,9 +23,6 @@ function sync(plr: Player, hp: number)
 	end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	syncEvent.OnServerEvent:Connect(sync)
 end

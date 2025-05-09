@@ -1,4 +1,3 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local sStore = game:GetService("ServerStorage")
@@ -8,10 +7,8 @@ local ssServ = game:GetService("ServerScriptService")
 
 local isStudio = runServ:IsStudio()
 
---> Module Stuff
 local module = {}
 
---> Variables
 local NUMACTORS = 4
 
 local SharedTypes = require(rStore.Data.SharedType)
@@ -29,7 +26,6 @@ local AF: Folder
 
 local currentActor = 1
 
---> Private Functions
 -- all of the return functions should be turned into calls to the ACService later
 function validate(plr: Player, packet: SharedTypes.MeleePacket)
 	local new: SharedTypes.MeleePacket = {
@@ -222,9 +218,7 @@ function onHit(melee: string, hum: Humanoid, inst: Tool)
 	Debris:AddItem(s, s.TimeLength)
 	s:Play()
 end
---> Module Functions
 
---> Loader Functions
 function module.Start()
 	task.delay(1, function()
 		AF = initalizeActors()

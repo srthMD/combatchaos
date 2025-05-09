@@ -1,10 +1,7 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Component Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
---> Class Definition
 local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
@@ -14,16 +11,13 @@ local GenericAnimatable = Component.new({
 	Ancestors = { workspace, game.Players },
 })
 
---> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
---> Constructor
 function GenericAnimatable:Construct()
 	self.Debounce = false
 	self.EquipDB = false
 end
 
---> Module Functions
 function GenericAnimatable:OnActivate()
 	if self.Debounce then
 		return

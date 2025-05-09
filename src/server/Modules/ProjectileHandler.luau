@@ -135,9 +135,6 @@ function AddProjectile(owner: Player, packet: SharedType.ProjectilePacket, doSou
 	_fireClientsExcept(owner, packet)
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	rev_Hit.OnServerEvent:Connect(HitSomething)
 	rev_ReplicateProjectile.OnServerEvent:Connect(AddProjectile)

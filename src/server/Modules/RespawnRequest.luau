@@ -1,14 +1,11 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Variables
 local module = {}
 
 local r_respawn = rStore.Signals.Remote.Unreliable.RequestRespawn
 
 local debounce = false
 
---> Private Functions
 function respawn(plr: Player)
 	if debounce then
 		return
@@ -31,9 +28,6 @@ function respawn(plr: Player)
 	end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	--r_respawn.OnServerEvent:Connect(respawn)
 end

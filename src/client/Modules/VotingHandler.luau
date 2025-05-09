@@ -96,6 +96,8 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 	musicPlayer.Asset = ""
 	musicPlayer.Looping = false
 	musicPlayer.TimePosition = 0
+	musicPlayer.Volume = 1
+	musicPlayer.PlaybackSpeed = 1
 	musicPlayer:ClearAllChildren()
 
 	if not defaultWire then
@@ -197,6 +199,8 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 
 							local sound = sounds[idx]
 							setUpSoundEffects(sound)
+							musicPlayer.Volume = sound.Volume
+							musicPlayer.PlaybackSpeed = sound.PlaybackSpeed
 							musicPlayer.Asset = sound.SoundId
 
 							local waitTime: number? = sound:GetAttribute("DelayTimeBeforePlay")

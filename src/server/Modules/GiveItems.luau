@@ -1,9 +1,7 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 local sStore = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 
---> Variables
 local module = {}
 
 local BiasedRandom = require(sStore.Shared.BiasedRandom)
@@ -17,8 +15,6 @@ local playing = game.ServerStorage.Playing
 
 local vanillaSlots = {} :: { string }
 local currentItemPool: Folder? = nil
-
---> Private Functions
 
 -- children in f1 override children in f2 with the same name
 local function createUnion(f1: Folder, f2: Folder): Folder
@@ -140,9 +136,6 @@ local function giveItems(plr: Player)
 	end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	for _, f in pairs(itemsFolder:GetChildren()) do
 		if f:IsA("Folder") then

@@ -27,6 +27,9 @@ local ui: CanvasGroup
 
 local mapName: string?
 
+local regenThread: thread?
+local __t: thread?
+
 local function characterAdd(char: Model)
 	local hum = char:WaitForChild("Humanoid", 6)
 
@@ -80,7 +83,6 @@ local function characterAdd(char: Model)
 	end)
 
 	--stamina stuff
-
 	local staminaBar: CanvasGroup = ui.Stamina.InnerBars
 
 	for _, frame in pairs(staminaBar:GetChildren()) do
@@ -90,9 +92,7 @@ local function characterAdd(char: Model)
 	end
 
 	local charges = 5
-	local regenThread: thread?
 	local regenTween: Tween?
-	local __t: thread?
 	local lock = false
 	con2 = hum.Jumping:Connect(function(state: boolean)
 		if state then
@@ -118,26 +118,30 @@ local function characterAdd(char: Model)
 					return
 				end
 
-				local prevBar: Frame = staminaBar[tostring(charges + 1)]
-				local transparency = prevBar.Transparency
-				local t_modifier = math.abs(prevBar.BackgroundTransparency - 1)
-				TweenService:Create(
-					prevBar,
-					TweenInfo.new(
-						depleteBarInfo.Time * t_modifier,
-						depleteBarInfo.EasingStyle,
-						depleteBarInfo.EasingDirection
-					),
-					{ BackgroundTransparency = 1 }
-				):Play()
+				local oob = (charges + 1) > 5
 
-				--if the charge was almost regenerated just use that charge instead
-				if transparency < 0.3 then
-					charges = tonumber(prevBar.Name) or charges
-					return
+				if not oob then
+					local prevBar: Frame = staminaBar[tostring(charges + 1)]
+					local transparency = prevBar.Transparency
+					local t_modifier = math.abs(prevBar.BackgroundTransparency - 1)
+					TweenService:Create(
+						prevBar,
+						TweenInfo.new(
+							depleteBarInfo.Time * t_modifier,
+							depleteBarInfo.EasingStyle,
+							depleteBarInfo.EasingDirection
+						),
+						{ BackgroundTransparency = 1 }
+					):Play()
+
+					--if the charge was almost regenerated just use that charge instead
+					if transparency < 0.35 then
+						charges = tonumber(prevBar.Name) or charges
+						return
+					end
+
+					doubleDeplete = true
 				end
-
-				doubleDeplete = true
 			end
 
 			if charges > 0 then
@@ -158,19 +162,8 @@ local function characterAdd(char: Model)
 	end)
 
 	con3 = hum.StateChanged:Connect(function(old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
-		if
-			new == Enum.HumanoidStateType.Landed
-			or new == Enum.HumanoidStateType.Climbing
-			or new == Enum.HumanoidStateType.Swimming
-			or new == Enum.HumanoidStateType.PlatformStanding
-			or new == Enum.HumanoidStateType.Running
-			or new == Enum.HumanoidStateType.Seated
-		then
+		if new == Enum.HumanoidStateType.Landed or new == Enum.HumanoidStateType.Running then
 			if regenThread then
-				return
-			end
-
-			if charges >= 5 then
 				return
 			end
 
@@ -179,6 +172,11 @@ local function characterAdd(char: Model)
 					hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
 					__t = nil
 				end)
+			end
+
+			if charges > 5 then
+				charges = 5
+				return
 			end
 
 			regenThread = task.spawn(function()
@@ -225,7 +223,7 @@ local function characterAdd(char: Model)
 
 				regenThread = nil
 			end)
-		elseif new ~= Enum.HumanoidStateType.FallingDown or new ~= Enum.HumanoidStateType.Freefall then
+		elseif new == Enum.HumanoidStateType.Ragdoll then
 			if regenThread then
 				task.cancel(regenThread)
 				regenThread = nil
@@ -255,7 +253,6 @@ return function(CoreUI: ScreenGui)
 
 	main.Parent = CoreUI
 	ui = main
-
 	sendTime.OnClientEvent:Connect(setTime)
 	mapChangedEvent.OnClientEvent:Connect(changeMapName)
 

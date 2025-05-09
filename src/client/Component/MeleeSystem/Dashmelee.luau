@@ -1,10 +1,7 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
---> Component Framework Dependencies
 local Component = require(rStore.Packages.Component)
 
---> Class Definition
 local BaseTool = require(script.Parent.Parent.AbstractComponents.BaseTool)
 local Super = require(script.Parent.Parent.AbstractComponents.BaseMelee)
 local OnlyLocalPlayer = require(script.Parent.Parent.AbstractComponents.OnlyLocalPlayer)
@@ -14,17 +11,14 @@ local Pitchfork = Component.new({
 	Ancestors = { workspace, game.Players },
 })
 
---> Variables
 local urev_OnEquip = rStore.Signals.Remote.Unreliable.OnEquipMelee
 
---> Cosnstructor
 function Pitchfork:Cosnstruct()
 	self.Debounce = false
 	self.EquipDB = false
 	self.Phase = 0
 end
 
---> Module Functions
 function Pitchfork:OnActivate(): ()
 	if self.EquipDB == true then
 		return

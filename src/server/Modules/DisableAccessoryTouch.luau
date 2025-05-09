@@ -1,14 +1,7 @@
--- @title: Server Projectile Handler
--- @author: qweekertom
--- @date: 2.29.2024
-
---> Services
 local Players = game:GetService("Players")
 
---> Variables
 local module = {}
 
---> Private Functions
 function onCharacterAdd(char: Model, plr: Player)
 	plr.CharacterAppearanceLoaded:Wait()
 
@@ -40,9 +33,6 @@ function onCharacterAdd(char: Model, plr: Player)
 	--end
 end
 
---> Module Functions
-
---> Loader Methods
 function module.Start()
 	Players.PlayerAdded:Connect(function(plr)
 		plr.CharacterAdded:Connect(function(char)

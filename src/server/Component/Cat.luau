@@ -1,20 +1,16 @@
---> Services
 local rStore = game:GetService("ReplicatedStorage")
 
 local Component = require(rStore.Packages.Component)
 
 local Cat = Component.new({ Tag = "Cat", Ancestors = { workspace } })
 
---> Variables
 local bounce = rStore.Assets.ItemDeps.CatTube.bounce
 
---> Constructor
 function Cat:Constuct()
 	self.hitDebounce = false
 	self.touchedConnection = nil
 end
 
---> Component Functions
 function Cat:OnHit()
 	if not self.hitDebounce then
 		self.hitDebounce = true
@@ -34,7 +30,6 @@ function Cat:OnHit()
 	end
 end
 
---> Init Function
 function Cat:Start()
 	self.touchedConnection = self.Instance.Touched:Connect(function()
 		self:OnHit()
