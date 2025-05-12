@@ -127,6 +127,7 @@ local function onCharAdded(char: Model)
 	local hum = char:FindFirstChildWhichIsA("Humanoid")
 
 	if not hum or not head then
+		warn("cant find head or humanoid")
 		return
 	end
 
@@ -156,14 +157,15 @@ local function onCharAdded(char: Model)
 
 			local min = head.Position - (0.5 * head.Size)
 			local max = head.Position + (0.5 * head.Size)
-			local region = Region3.new(min, max):ExpandToGrid(2)
+			local region = Region3.new(min, max):ExpandToGrid(4)
 
 			local water = workspace.Terrain:ReadVoxelChannels(region, 4, { "LiquidOccupancy" })
 
 			if water and water.Size.X ~= 0 and water.Size.Y ~= 0 and water.Size.Z ~= 0 then
 				local material = water["LiquidOccupancy"][1][1][1]
+				print(water.Size)
 
-				if material >= 0.3 then
+				if material >= 0.25 then
 					underwater = true
 					bar.Visible = true
 					airTime = math.max(airTime - (1.2 * dt), 0)

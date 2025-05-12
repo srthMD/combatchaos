@@ -13,6 +13,7 @@ return function(CoreUI: ScreenGui)
 
 	local muteIcon: ImageButton = rStore.Assets.StaticInterface.Mute:Clone()
 	muteIcon.Parent = CoreUI
+	muteIcon.ZIndex = -100
 
 	local musicPlayer: AudioPlayer? = SoundService:FindFirstChild("Music")
 

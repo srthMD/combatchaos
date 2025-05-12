@@ -1,3 +1,10 @@
+--TODO: remove when 100% sure its not needed
+--rn the button is disabled and dosent show up
+
+if true then
+	return function() end
+end
+
 local rStore = game:GetService("ReplicatedStorage")
 
 local r_respawn = rStore.Signals.Remote.Unreliable.RequestRespawn
@@ -15,7 +22,9 @@ return function(CoreUI: ScreenGui)
 			local hum = char:FindFirstChildWhichIsA("Humanoid")
 
 			if hum then
-				if hum.Health == 0 then return end
+				if hum.Health == 0 then
+					return
+				end
 			end
 		end
 

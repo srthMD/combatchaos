@@ -18,7 +18,6 @@ local mapData = rStore.Data.Maps
 local lobbyData = rStore.Data.Lobbies
 
 local defaultLightingData = require(rStore.Data.DefaultLighting)
-local SharedTypes = require(rStore.Data.SharedType)
 
 local musicPlayer: AudioPlayer = SoundService.Music
 local musicOutput: AudioDeviceOutput = SoundService.MusicOutput
@@ -114,10 +113,10 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 		setLighting(defaultLightingData)
 		warn(`Map "{mapName}" does not have corresponding mapData folder!`)
 	else
-		local tracks = mapDataFolder:FindFirstChild("Tracks")
-		local lightingData = mapDataFolder:FindFirstChild("Lighting")
-		local ui = mapDataFolder:FindFirstChild("UI")
-		local postFx = mapDataFolder:FindFirstChild("PostEffects")
+		local tracks = mapDataFolder:FindFirstChild("Tracks") :: Folder
+		local lightingData = mapDataFolder:FindFirstChild("Lighting") :: Folder
+		local ui = mapDataFolder:FindFirstChild("UI") :: Folder
+		local postFx = mapDataFolder:FindFirstChild("PostEffects") :: Folder
 		local skybox = mapDataFolder:FindFirstChildWhichIsA("Sky")
 		local clouds = mapDataFolder:FindFirstChildWhichIsA("Clouds")
 
@@ -144,30 +143,29 @@ local function onMapChange(mapName: string, isLobby: boolean?)
 			setLighting(require(lightingData))
 		end
 
-		if ui == nil or postFx == nil then
-			warn("aaaa")
-			return
-		end
-
 		if clouds then
 			local c = clouds:Clone()
 			c.Parent = workspace.Terrain
 		end
 
-		for _, v in pairs(ui:GetChildren()) do
-			if v:IsA("GuiObject") then
-				local c = v:Clone()
-				c.Visible = true
-				c.Parent = lPlr.PlayerGui.MapFx
+		if ui then
+			for _, v in pairs(ui:GetChildren()) do
+				if v:IsA("GuiObject") then
+					local c = v:Clone()
+					c.Visible = true
+					c.Parent = lPlr.PlayerGui.MapFx
+				end
 			end
 		end
 
-		for _, v in pairs(postFx:GetChildren()) do
-			local c = v:Clone()
-			if c:IsA("PostEffect") then
-				c.Enabled = true
+		if postFx then
+			for _, v in pairs(postFx:GetChildren()) do
+				local c = v:Clone()
+				if c:IsA("PostEffect") then
+					c.Enabled = true
+				end
+				c.Parent = game.Lighting
 			end
-			c.Parent = game.Lighting
 		end
 
 		if tracks then

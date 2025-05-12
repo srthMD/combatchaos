@@ -9,7 +9,7 @@ return function(CoreUI: ScreenGui)
 	local cg = assets.StaticInterface.Abilities:Clone()
 	cg.Parent = CoreUI
 
-	plr.CharacterRemoving:Connect(function(_: Model)
+	plr.CharacterRemoving:Connect(function(_)
 		for _, frame: Instance in pairs(cg:GetChildren()) do
 			if frame:IsA("Frame") then
 				frame:Destroy()

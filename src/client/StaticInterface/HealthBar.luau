@@ -1,8 +1,6 @@
 local rStore = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local MAX_AS_SCALE = 0.1
-local MIN_AS_SCALE = -0.9
 local BASE_HUE = 0.35
 local BASE_SAT = 0.75
 local BASE_VALUE = 0.85
@@ -28,6 +26,8 @@ local ui: CanvasGroup
 local mapName: string?
 
 local regenThread: thread?
+local regenTween: Tween?
+local depleteTween: Tween?
 local __t: thread?
 
 local function characterAdd(char: Model)
@@ -61,19 +61,19 @@ local function characterAdd(char: Model)
 
 	ui.Health.Bar.BackgroundColor3 = Color3.fromHSV(BASE_HUE, BASE_SAT, BASE_VALUE)
 	ui.Health.Info.Numbers.Text = string.format(" %d/%d", health, max)
-	ui.Health.Bar.UIGradient.Offset = Vector2.new(0.1, 0)
+	ui.Health.Bar.Size = UDim2.fromScale(1, 1)
 
 	con = hum.Changed:Connect(function(property: string)
 		if property == "Health" then
 			local health = hum.Health
 			local max = hum.MaxHealth
 
-			local scale = health / max - 0.9
-			local hue = ((scale - MIN_AS_SCALE) / (MAX_AS_SCALE - MIN_AS_SCALE)) * BASE_HUE
+			local scale = health / max
+			local hue = scale * BASE_HUE
 			ui.Health.Bar.BackgroundColor3 = Color3.fromHSV(math.max(hue, 0), BASE_SAT, BASE_VALUE)
 
 			ui.Health.Info.Numbers.Text = string.format(" %d/%d", health, max)
-			TweenService:Create(ui.Health.Bar.UIGradient, info, { Offset = Vector2.new(scale, 0) }):Play()
+			TweenService:Create(ui.Health.Bar, info, { Size = UDim2.fromScale(scale, 1) }):Play()
 		elseif property == "MaxHealth" then
 			local health = hum.Health
 			local max = hum.MaxHealth
@@ -83,7 +83,12 @@ local function characterAdd(char: Model)
 	end)
 
 	--stamina stuff
-	local staminaBar: CanvasGroup = ui.Stamina.InnerBars
+	local staminaBar = ui.Stamina.InnerBars :: CanvasGroup
+
+	if regenTween then
+		regenTween:Cancel()
+		regenTween = nil
+	end
 
 	for _, frame in pairs(staminaBar:GetChildren()) do
 		if frame:IsA("Frame") then
@@ -92,11 +97,9 @@ local function characterAdd(char: Model)
 	end
 
 	local charges = 5
-	local regenTween: Tween?
-	local lock = false
+
 	con2 = hum.Jumping:Connect(function(state: boolean)
 		if state then
-			lock = true
 			hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 
 			if __t then
@@ -121,7 +124,7 @@ local function characterAdd(char: Model)
 				local oob = (charges + 1) > 5
 
 				if not oob then
-					local prevBar: Frame = staminaBar[tostring(charges + 1)]
+					local prevBar = staminaBar[tostring(charges + 1)] :: Frame
 					local transparency = prevBar.Transparency
 					local t_modifier = math.abs(prevBar.BackgroundTransparency - 1)
 					TweenService:Create(
@@ -136,7 +139,6 @@ local function characterAdd(char: Model)
 
 					--if the charge was almost regenerated just use that charge instead
 					if transparency < 0.35 then
-						charges = tonumber(prevBar.Name) or charges
 						return
 					end
 
@@ -145,24 +147,26 @@ local function characterAdd(char: Model)
 			end
 
 			if charges > 0 then
-				local barToDeplete: Frame = staminaBar[tostring(charges)]
-				local t = TweenService:Create(barToDeplete, depleteBarInfo, { BackgroundTransparency = 1 })
+				local barToDeplete = staminaBar[tostring(charges)] :: Frame
+				depleteTween = TweenService:Create(barToDeplete, depleteBarInfo, { BackgroundTransparency = 1 })
 
 				if doubleDeplete then
 					task.wait(0.075)
 				end
 
-				t:Play()
+				(depleteTween :: Tween):Play()
 
 				charges = math.clamp(charges - 1, 0, 5)
 			end
-
-			lock = false
 		end
 	end)
 
 	con3 = hum.StateChanged:Connect(function(old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
-		if new == Enum.HumanoidStateType.Landed or new == Enum.HumanoidStateType.Running then
+		if
+			new == Enum.HumanoidStateType.Swimming
+			or new == Enum.HumanoidStateType.Climbing
+			or new == Enum.HumanoidStateType.Running
+		then
 			if regenThread then
 				return
 			end
@@ -194,11 +198,6 @@ local function characterAdd(char: Model)
 
 				local chargesAdded = 0
 				while charges < 5 do
-					if lock then
-						regenThread = nil
-						return
-					end
-
 					local barToRegen: Frame = staminaBar[tostring(charges + 1)]
 
 					local bonus = 0
@@ -211,6 +210,7 @@ local function characterAdd(char: Model)
 						TweenInfo.new(REGEN_TIME - bonus, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 						{ BackgroundTransparency = 0 }
 					)
+
 					regenTween:Play()
 
 					task.wait(REGEN_TIME - bonus)

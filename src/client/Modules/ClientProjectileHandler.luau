@@ -38,21 +38,16 @@ end
 
 function cleanUpInst(inst: BasePart)
 	inst.Anchored = true
+	inst.Transparency = 1
 	for _, v in pairs(inst:GetDescendants()) do
 		if v:IsA("ParticleEmitter") then
 			v.Enabled = false
-		end
-
-		if v:IsA("PVAdornment") or v:IsA("Highlight") or v:IsA("Light") or v:IsA("BillboardGui") then
+		elseif not v:IsA("Trail") then
 			v:Destroy()
 		end
 
 		if v:IsA("BasePart") then
 			v.Transparency = 1
-		end
-
-		if v:IsA("SpecialMesh") then
-			v:Destroy()
 		end
 
 		Debris:AddItem(inst, 2)
